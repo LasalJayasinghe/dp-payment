@@ -21,7 +21,8 @@
         <div class="card-body register-card-body">
             <p class="login-box-msg">Register a new user</p>
 
-            <form method="POST" action="register.php">
+            <form action="{{ route('auth.signup') }}" method="POST">
+                @csrf
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" placeholder="Full Name" id="username" name="fname" required>
                     <div class="input-group-append">
