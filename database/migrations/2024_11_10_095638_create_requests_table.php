@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('supplier_id'); // Foreign key to supplier
             $table->timestamp('due_date'); // Due date field
             $table->text('note')->nullable(); // Note field, nullable
-            $table->enum('priority', ['low', 'medium', 'high'])->default('low'); // Priority field
+            $table->enum('priority', ['normal', 'high'])->default('normal'); // Priority field
             $table->string('vender_invoice')->nullable(); // Vendor invoice, nullable
             $table->string('type')->nullable(); // Indicator field, nullable
             $table->string('indicator')->nullable(); // Indicator field, nullable

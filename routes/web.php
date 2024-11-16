@@ -27,6 +27,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/requests/{id}/update', [RequestController::class, 'updateRequest'])->name('request.update');
     Route::post('/requests/update-status', [RequestController::class, 'updateStatus'])->name('requests.updateStatus');
 
+    Route::get('requests/chat-status/{id}', [RequestController::class, 'getChatStatus'])->name('requests.chatStatus');
+    Route::post('requests/enable-chat/{id}', [RequestController::class, 'enableChat'])->name('requests.enableChat');
+    Route::post('requests/send-chat-message/{id}', [RequestController::class, 'sendChatMessage'])->name('requests.sendChatMessage');
+    Route::get('/chat/{request_id}', [RequestController::class, 'getMessages'])->name('chat.getMessages');
 
     Route::get('/requests/pending-check', [RequestController::class, 'index'])->name('requests.pending-check');
     Route::get('/requests/pending-approval', [RequestController::class, 'index'])->name('requests.pending-approval');

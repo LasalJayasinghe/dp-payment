@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Chat;
+use App\Models\ChatStatus;
 use App\Models\RejectedRequests;
 use App\Models\Requests;
 use App\Models\Supplier;
@@ -172,7 +174,9 @@ class RequestController extends Controller
         $requestRecord->status = $validated['status'];
         if ($validated['status'] === 'checked') {
             $requestRecord->checked_by = Auth::id();
-        } elseif ($validated['status'] === 'approved') {
+        } elseif ($validated['status'] === 'waiting_for_signature') {
+            $requestRecord->signed_by = Auth::id();
+        }  elseif ($validated['status'] === 'approved') {
             $requestRecord->approved_by = Auth::id();
         } elseif ($validated['status'] === 'rejected') {
             $rejectedRequest = new RejectedRequests();
@@ -184,5 +188,54 @@ class RequestController extends Controller
         $requestRecord->save();
     
         return response()->json(['success' => true]);
+    }
+
+    public function getChatStatus($id)
+    {
+        $chatStatus = ChatStatus::where('request_id', $id)->first();
+
+        if ($chatStatus) {
+            return response()->json(['chat' => $chatStatus->status]);
+        }
+
+        return response()->json(['chat' => 0]);
+    }
+
+    public function enableChat($id)
+    {
+        $chatStatus = ChatStatus::where('request_id', $id)->first();
+        if ($chatStatus) {
+            $chatStatus->update(['status' => true]);
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false]);
+    }
+
+    public function sendChatMessage(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        $message = new Chat();
+        $message->request_id = $id;
+        $message->sender_id = Auth::id();
+        $message->message = $request->message;
+        $message->save();
+
+        return response()->json([
+            'success' => true,
+            'userName' => $user->name
+        ]);
+    
+    }
+
+    public function getMessages($request_id)
+    {
+        $messages = Chat::where('request_id', $request_id)
+                        ->with('sender') 
+                        ->orderBy('created_at', 'asc')
+                        ->get();
+
+        return response()->json(['success' => true, 'messages' => $messages]);
     }
 }
