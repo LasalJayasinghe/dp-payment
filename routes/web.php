@@ -21,6 +21,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/requests', [RequestController::class, 'index'])->name('request.show');
     Route::match(['get', 'post'], '/requests/create', [RequestController::class, 'createRequest'])->name('request.create');
+    Route::match(['get', 'post'], '/requests/uploadFiles', [RequestController::class, 'uploadFiles'])->name('request.uploadFiles');
+    Route::post('/request/delete-file', [RequestController::class, 'deleteFile'])->name('request.deleteFile');
+
     Route::get('/requests/supplier/{id}', [RequestController::class, 'getAccountsForSupplier'])->name('request.supplierAccounts');
     Route::get('/requests/account/{id}', [RequestController::class, 'getAccountDetails'])->name('request.accountDetails');
     Route::get('/requests/{id}/info', [RequestController::class, 'getRequestDeatails'])->name('request.details');

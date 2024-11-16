@@ -32,8 +32,8 @@
         <div class="col-12">
           <div class="card">
             <div class="card-body">
-              <form method="POST" action="{{route('request.create')}}" enctype="multipart/form-data">
-                @csrf
+          <form method="POST" action="{{route('request.create')}}" enctype="multipart/form-data">
+            @csrf
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group" style="width: 400px;" readonly>
@@ -156,6 +156,7 @@
 
           <div class="form-group">
             <label for="documents">Upload documents</label>
+            <input type="hidden" name="uploaded_files" id="uploaded_files">
             <div class="dropzone" id="my-dropzone"></div>
         </div>
         
@@ -286,6 +287,48 @@
         });
     });
 });
+
+Dropzone.autoDiscover = false;
+const myDropzone = new Dropzone("#my-dropzone", {
+    url: "{{ route('request.uploadFiles') }}",
+    maxFiles: 5,
+    maxFilesize: 5, // Maximum file size in MB
+    acceptedFiles: "image/*,application/pdf",
+    addRemoveLinks: true,
+    headers: {
+        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+    },
+    init: function () {
+        this.on("success", function (file, response) {
+            file.serverFileName = response.filePath; // Store file path returned from the server
+            let uploadedFilesInput = document.getElementById("uploaded_files");
+            uploadedFilesInput.value += response.filePath + ","; // Append file path
+        });
+
+        this.on("removedfile", function (file) {
+            console.log("Removing file:", file);
+            if (file.serverFileName) {
+                // Send request to delete the file
+                axios.post("{{ route('request.deleteFile') }}", {
+                    filePath: file.serverFileName
+                })
+                .then(response => {
+                    console.log("File removed from server:", response.data.message);
+                })
+                .catch(error => {
+                    console.error("Error removing file:", error.response.data.message);
+                });
+            } else {
+                console.error("No serverFileName found for file:", file);
+            }
+        });
+
+        this.on("error", function (file, response) {
+            console.error("Error uploading file:", response);
+        });
+    }
+});
+
 
 </script>
 @endpush

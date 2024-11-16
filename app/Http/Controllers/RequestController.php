@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Chat;
 use App\Models\ChatStatus;
+use App\Models\Files;
 use App\Models\RejectedRequests;
 use App\Models\Requests;
 use App\Models\Supplier;
@@ -12,7 +13,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class RequestController extends Controller
 {
@@ -87,12 +90,54 @@ class RequestController extends Controller
             $new_request->payment_link = $request->payment_link;
             $new_request->save();
 
+            $uploadedFiles = $request->uploaded_files;
+            $filePaths = explode(',', rtrim($uploadedFiles, ',')); // Split the string and remove trailing comma
+        
+            // Initialize an array to hold valid file paths
+            $validFiles = [];
+        
+            // Loop through each file path and check if it exists
+            foreach ($filePaths as $filePath) {
+                if (File::exists(public_path($filePath))) {
+                    $validFiles[] = $filePath; // Add to valid files array if it exists
+                }
+            }
+        
+            // Save valid files to the database with the request ID
+            foreach ($validFiles as $validFile) {
+                Files::create([
+                    'request_id' => $request->id,
+                    'file_path' => $validFile,
+                ]);
+            }
+
             return redirect()->route('dashboard')->with('success', 'Request added successfully!');
         }
 
         $suppliers = Supplier::all();
         return view('requests.create' , compact('suppliers'));
     }
+
+    public function uploadFiles(Request $request)
+    {
+        $file = $request->file('file');
+        $path = $file->store('uploads', 'public'); // Adjust storage path as needed
+        return response()->json(['filePath' => $path]);
+    }
+
+    public function deleteFile(Request $request)
+    {
+        $filePath = $request->input('filePath');
+
+        if (Storage::disk('public')->exists($filePath)) {
+            Storage::disk('public')->delete($filePath);
+
+            return response()->json(['message' => 'File deleted successfully.'], 200);
+        }
+
+        return response()->json(['message' => 'File not found.'], 404);
+    }
+
 
     public function getAccountsForSupplier($id)
     {
