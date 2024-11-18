@@ -49,4 +49,18 @@ class SuppliersController extends Controller
         return view('supplier.show' , compact('suppliers'));
     }
 
+    public function destroy($id)
+    {
+        try {
+            $supplier = Supplier::findOrFail($id);
+
+            SupplierAccount::where('supplier_id' , $id)->delete();
+            $supplier->delete();
+    
+            return response()->json(['success' => true, 'message' => 'Category deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete category']);
+        }
+    }
+
 }

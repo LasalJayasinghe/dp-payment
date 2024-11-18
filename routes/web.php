@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/requests', [RequestController::class, 'index'])->name('request.show');
+    Route::get('/allRequests', [RequestController::class, 'getAllUserRequests'])->name('request.userRequests');
     Route::match(['get', 'post'], '/requests/create', [RequestController::class, 'createRequest'])->name('request.create');
     Route::match(['get', 'post'], '/requests/uploadFiles', [RequestController::class, 'uploadFiles'])->name('request.uploadFiles');
     Route::post('/request/delete-file', [RequestController::class, 'deleteFile'])->name('request.deleteFile');
@@ -29,6 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/requests/{id}/info', [RequestController::class, 'getRequestDeatails'])->name('request.details');
     Route::post('/requests/{id}/update', [RequestController::class, 'updateRequest'])->name('request.update');
     Route::post('/requests/update-status', [RequestController::class, 'updateStatus'])->name('requests.updateStatus');
+
+    Route::get('/files/{requestId}', [RequestController::class, 'getFiles']);
+    Route::get('/categories', [CategoryController::class, 'getCategories'])->name('categories.get');
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
 
     Route::get('requests/chat-status/{id}', [RequestController::class, 'getChatStatus'])->name('requests.chatStatus');
     Route::post('requests/enable-chat/{id}', [RequestController::class, 'enableChat'])->name('requests.enableChat');
@@ -47,4 +53,6 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/supplier/create', [SuppliersController::class, 'createSupplier'])->name('supplier.create');
     Route::match(['get', 'post'], '/supplier/account', [SuppliersController::class, 'addAccount'])->name('supplier.account');
     Route::get('/supplier/show', [SuppliersController::class, 'showSuppliers'])->name('supplier.show');
+    Route::delete('/supplier/{id}', [SuppliersController::class, 'destroy'])->name('supplier.destroy');
+
 });

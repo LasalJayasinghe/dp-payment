@@ -16,9 +16,7 @@
                         <p><strong>Category:</strong> 
                             <span id="category"></span>
                             <select id="category_select" class="form-control mt-2" style="display: inline-block; width: auto; margin-left: 10px;">
-                                <option value="Office Suppliers">Office Suppliers</option>
-                                <option value="Travel Expenses">Travel Expenses</option>
-                                <option value="Equipments">Equipments</option>
+                                <!-- Options will be populated here via JavaScript -->
                             </select>
                         </p>
                         
@@ -36,7 +34,7 @@
                         <p><strong>Account Number:</strong> <span id="account_number"></span></p>
                         <p><strong>Bank Name:</strong> <span id="bank_name"></span></p>
                         <p><strong>Note:</strong> <span id="note"></span></p>
-                        <p><strong>Document Link:</strong> <a id="document_link" href="" target="_blank">View Document</a></p>
+                        {{-- <p><strong>Document Link:</strong> <a id="document_link" href="" target="_blank">View Document</a></p> --}}
                     </div>
                 </div>
             </div>
@@ -99,4 +97,30 @@
         // Save the PDF
         doc.save("request-details.pdf");
     }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+    fetchCategories();
+});
+
+function fetchCategories() {
+    fetch('/categories') // Ensure this matches the route name
+        .then(response => response.json())
+        .then(categories => {
+            const categorySelect = document.getElementById('category_select');
+            categorySelect.innerHTML = ''; // Clear existing options
+
+            // Populate the dropdown with categories
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id; // Use `id` for the value
+                option.textContent = category.name; // Display the category name
+                categorySelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching categories:', error);
+        });
+}
+
 </script>

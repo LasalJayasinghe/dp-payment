@@ -15,10 +15,25 @@ class DashboardController extends Controller
             $user_role = Auth::user()->role; // Access the role attribute
     
             if ($user_role == 'admin') {
-                return view('admin.dashboard');
+                $requests = Requests::all();
+            
+                $pending = $requests->where('status', 'pending')->count();
+                $checked = $requests->where('status', 'checked')->count();
+                $waiting = $requests->where('status', 'waiting_for_signature')->count();
+                $approved = $requests->where('status', 'approved')->count();
+                $rejected = $requests->where('status', 'rejected')->count();
+            
+                // Pass the counts to the view
+                return view('admin.dashboard', [
+                    'pending' => $pending,
+                    'checked' => $checked,
+                    'waiting' => $waiting,
+                    'approved' => $approved,
+                    'rejected' => $rejected,
+                ]);
             } elseif ($user_role == 'user') {
 
-                $requests = Requests::where('status' , 'pending')->get();
+                $requests = Requests::where(['status' => 'pending' , 'user_id' => Auth::user()->id])->get();
                 foreach ($requests as $request){
                     $request->supplier_name = Supplier::where('id', $request->supplier_id)->pluck('supplier_name')->first();
                 }

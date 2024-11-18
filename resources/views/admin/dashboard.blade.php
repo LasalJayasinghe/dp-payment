@@ -26,7 +26,7 @@
                             <!-- small box -->
                             <div class="small-box bg-info">
                                 <div class="inner">
-                                    <h3 id="pending-count">-</h3>
+                                    <h3 id="pending-count">{{$pending}}</h3>
                                     <p>Pending Requests</p>
                                 </div>
                                 <div class="icon">
@@ -38,7 +38,7 @@
                             <!-- small box -->
                             <div class="small-box bg-success">
                                 <div class="inner">
-                                    <h3 id="checked-count">-</h3>
+                                    <h3 id="checked-count">{{$checked}}</h3>
                                     <p>Checked Requests</p>
                                 </div>
                                 <div class="icon">
@@ -50,7 +50,7 @@
                             <!-- small box -->
                             <div class="small-box bg-warning">
                                 <div class="inner">
-                                    <h3 id="waiting-for-signature-count">-</h3>
+                                    <h3 id="waiting-for-signature-count">{{$waiting}}</h3>
                                     <p>Waiting for Signature</p>
                                 </div>
                                 <div class="icon">
@@ -62,7 +62,7 @@
                             <!-- small box -->
                             <div class="small-box bg-primary">
                                 <div class="inner">
-                                    <h3 id="approved-count">-</h3>
+                                    <h3 id="approved-count">{{$approved}}</h3>
                                     <p>Approved Requests</p>
                                 </div>
                                 <div class="icon">
@@ -74,7 +74,7 @@
                             <!-- small box -->
                             <div class="small-box bg-danger">
                                 <div class="inner">
-                                    <h3 id="rejected-count">-</h3>
+                                    <h3 id="rejected-count">{{$rejected}}</h3>
                                     <p>Rejected Requests</p>
                                 </div>
                                 <div class="icon">

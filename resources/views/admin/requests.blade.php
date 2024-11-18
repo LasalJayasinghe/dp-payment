@@ -136,6 +136,23 @@
     </div>
 </div>
 
+<div id="documentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+    <div class="bg-white rounded-lg shadow-lg w-3/4 max-w-lg">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Files</h3>
+            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">&times;</button>
+        </div>
+        <div class="p-4">
+            <ul id="fileList" class="space-y-2"></ul>
+        </div>
+        <div class="p-4 border-t text-right">
+            <button onclick="closeModal()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 <x-request-details-modal
 :category="$request->category"
 :subcategory="$request->subcategory"
@@ -157,6 +174,55 @@
 
 @push('scripts')
 <script>
+
+function viewDocument(requestId) {
+    // Fetch files using AJAX
+    fetch(`/files/${requestId}`)
+        .then(response => response.json())
+        .then(files => {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = ''; // Clear previous data
+
+            if (files.length === 0) {
+                // If no files, show a "No documents" message
+                fileList.innerHTML = `<li class="text-center text-gray-500">No documents available</li>`;
+            } else {
+                files.forEach((file, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('flex', 'justify-between', 'items-center', 'border-b', 'pb-2');
+                    listItem.innerHTML = `
+                        <span>Document ${index + 1}</span>
+                        <button onclick="downloadFile('${file.file_path}')" class="text-blue-500 hover:underline">Download</button>
+                    `;
+                    fileList.appendChild(listItem);
+                });
+            }            
+
+            // Show the modal
+            document.getElementById('documentModal').classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Error fetching files:', error);
+            alert('Failed to fetch files.');
+        });
+}
+
+function closeModal() {
+    document.getElementById('documentModal').classList.add('hidden');
+}
+
+function downloadFile(filePath) {
+    // Prepend /storage/ to the file path
+    const publicPath = `/storage/${filePath}`;
+    const link = document.createElement('a');
+    link.href = publicPath;
+    link.download = filePath.split('/').pop(); // Extract file name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
 
 function viewRequest(requestId) {
     $.ajax({

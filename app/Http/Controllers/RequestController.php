@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Chat;
 use App\Models\ChatStatus;
 use App\Models\Files;
@@ -49,12 +50,32 @@ class RequestController extends Controller
                 return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
 
         } else {
+
+            Log::info("works" , [$status]);
             $requests = Requests::where('user_id', $user->id)
                 ->where('status', $status)
                 ->get();
+
+                Log::info("works" , [$requests]);
+
         }
 
         return view('requests.show', compact('requests', 'heading', 'statusClasses'));
+    }
+
+    public function getAllUserRequests()
+    {
+        $user = Auth::user();
+        $requests = Requests::where('user_id' ,$user->id )->get();
+
+        foreach($requests as $request)
+        {
+            $request->supplier_name = Supplier::where('id', $request->supplier_id)->pluck('supplier_name')->first();
+            $request->checked = User::where('id' , $request->checked_by)->pluck('name')->first();
+            $request->approved = User::where('id' , $request->approved_by)->pluck('name')->first();
+        }
+
+        return view('requests.allRequests', compact('requests'));
     }
 
     private function getHeading($status)
@@ -91,22 +112,19 @@ class RequestController extends Controller
             $new_request->save();
 
             $uploadedFiles = $request->uploaded_files;
-            $filePaths = explode(',', rtrim($uploadedFiles, ',')); // Split the string and remove trailing comma
-        
-            // Initialize an array to hold valid file paths
+            $filePaths = explode(',', rtrim($uploadedFiles, ','));
+
             $validFiles = [];
         
             // Loop through each file path and check if it exists
             foreach ($filePaths as $filePath) {
-                if (File::exists(public_path($filePath))) {
                     $validFiles[] = $filePath; // Add to valid files array if it exists
-                }
             }
         
             // Save valid files to the database with the request ID
             foreach ($validFiles as $validFile) {
                 Files::create([
-                    'request_id' => $request->id,
+                    'request_id' => $new_request->id,
                     'file_path' => $validFile,
                 ]);
             }
@@ -219,21 +237,90 @@ class RequestController extends Controller
         $requestRecord->status = $validated['status'];
         if ($validated['status'] === 'checked') {
             $requestRecord->checked_by = Auth::id();
+            $requestRecord->checked_date = Carbon::now();
+            $this->sendStatusChangeNotification($requestRecord, 'checked');
+
         } elseif ($validated['status'] === 'waiting_for_signature') {
             $requestRecord->signed_by = Auth::id();
+
         }  elseif ($validated['status'] === 'approved') {
             $requestRecord->approved_by = Auth::id();
+            $requestRecord->approved_date = Carbon::now();
+            $this->sendStatusChangeNotification($requestRecord, 'approved');
+
         } elseif ($validated['status'] === 'rejected') {
             $rejectedRequest = new RejectedRequests();
             $rejectedRequest->request_id = $request->request_id;
             $rejectedRequest->rejected_by= Auth::id();
             $rejectedRequest->message = $request->reject_message;
             $rejectedRequest->save();
+            $this->sendStatusChangeNotification($requestRecord, 'rejected');
+
         }
         $requestRecord->save();
     
         return response()->json(['success' => true]);
     }
+
+    private function sendStatusChangeNotification($requestRecord, $status)
+    {
+        Log::info("request data" , [ $requestRecord]);
+        $requestUserEmail = User::where('id' , $requestRecord->user_id)->pluck('email')->first();
+        $checkedByEmail = $requestRecord->checked_by 
+        ? User::where('id', $requestRecord->checked_by)->pluck('email')->first() 
+        : null;
+    
+    $approvedByEmail = $requestRecord->approved_by 
+        ? User::where('id', $requestRecord->approved_by)->pluck('email')->first() 
+        : null;
+
+        $emailSubject = "Request #{$requestRecord->id} Status Updated: " . ucfirst($status);
+        $emailContent = "
+            <html>
+            <head>
+                <title>Status Update Notification</title>
+            </head>
+            <body>
+                <p>The request with ID {$requestRecord->id} has been {$status}.</p>
+                <p>Details:</p>
+                <ul>
+                    <li>Request ID: {$requestRecord->id}</li>
+                    <li>Status: {$status}</li>
+                    <li>Checked By: " . ($checkedByEmail ?? 'N/A') . "</li>
+                    <li>Approved By: " . ($approvedByEmail ?? 'N/A') . "</li>
+                </ul>
+            </body>
+            </html>";
+
+        $sendgrid = new \SendGrid(env('SENDGRID_API_KEY'));
+
+        $emailMessage = new \SendGrid\Mail\Mail();
+        $emailMessage->setFrom("info@yourdomain.com", "Your App");
+        $emailMessage->setSubject($emailSubject);
+        $emailMessage->addTo($requestUserEmail); // Send to request user
+        if ($checkedByEmail) {
+            $emailMessage->addCc($checkedByEmail);
+        }
+        if ($approvedByEmail) {
+            $emailMessage->addCc($approvedByEmail);
+        }
+        $emailMessage->addContent("text/html", $emailContent);
+
+        try {
+            $response = $sendgrid->send($emailMessage);
+            if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
+                return true; // Email sent successfully
+            } else {
+                // Log errors for debugging
+                Log::error("Failed to send email: " . $response->body());
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error('Caught exception: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 
     public function getChatStatus($id)
     {
@@ -283,4 +370,11 @@ class RequestController extends Controller
 
         return response()->json(['success' => true, 'messages' => $messages]);
     }
+
+    public function getFiles($requestId)
+    {
+        $files = Files::where('request_id', $requestId)->get();
+        return response()->json($files);
+    }
+
 }

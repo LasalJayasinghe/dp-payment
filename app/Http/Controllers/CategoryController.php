@@ -27,5 +27,23 @@ class CategoryController extends Controller
         $categories = Category::all();
         return view('category.show' , compact('categories'));
     }
+
+    public function getCategories()
+    {
+        $categories = Category::all(['id', 'name']); // Adjust fields as needed
+        return response()->json($categories);
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $category = Category::findOrFail($id);
+            $category->delete();
+
+            return response()->json(['success' => true, 'message' => 'Category deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete category']);
+        }
+    }
 }
 

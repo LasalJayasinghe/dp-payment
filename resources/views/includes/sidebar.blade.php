@@ -32,6 +32,12 @@
                         <li class="nav-item">
                             <a href="{{ route('request.show') }}" class="nav-link">
                                 <i class="far fa-list-alt nav-icon"></i>
+                                <p style="display: inline; margin-left: 5px;">Admin Show All</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('request.userRequests') }}" class="nav-link">
+                                <i class="far fa-list-alt nav-icon"></i>
                                 <p style="display: inline; margin-left: 5px;">Show All</p>
                             </a>
                         </li>
