@@ -88,6 +88,27 @@
                       </td>
                     </tr>
                   @endforeach
+
+
+                  <x-request-details-modal
+                    :category="$row->category"
+                    :subcategory="$row->subcategory"
+                    :supplier_name="$row->supplier_name"
+                    :amount="$row->amount"
+                    :status="$row->status"
+                    :requested_date="$row->requested_date"
+                    :requested_by="$row->requested_by"
+                    :due_date="$row->due_date"
+                    :payment_type="$row->payment_type"
+                    :account_name="$row->account_name"
+                    :account_number="$row->account_number"
+                    :bank_name="$row->bank_name"
+                    :note="$row->note"
+                    :document_link="$row->document_link"
+                    />
+
+
+
                 @else
                   <tr>
                       <td colspan="10">
@@ -124,25 +145,6 @@
       </div>
   </div>
 </div>
-
-<x-request-details-modal
-:category="$row->category"
-:subcategory="$row->subcategory"
-:supplier_name="$row->supplier_name"
-:amount="$row->amount"
-:status="$row->status"
-:requested_date="$row->requested_date"
-:requested_by="$row->requested_by"
-:due_date="$row->due_date"
-:payment_type="$row->payment_type"
-:account_name="$row->account_name"
-:account_number="$row->account_number"
-:bank_name="$row->bank_name"
-:note="$row->note"
-:document_link="$row->document_link"
-/>
-
-
 @endsection
 
 

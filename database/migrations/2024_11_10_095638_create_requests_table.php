@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps(); // created_at and updated_at
             $table->string('subcategory'); // Subcategory field
             $table->unsignedBigInteger('supplier_id'); // Foreign key to supplier
-            $table->timestamp('due_date'); // Due date field
+            $table->timestamp('due_date')->nullable(); // Due date field
             $table->text('note')->nullable(); // Note field, nullable
             $table->enum('priority', ['normal', 'high'])->default('normal'); // Priority field
             $table->string('vender_invoice')->nullable(); // Vendor invoice, nullable
