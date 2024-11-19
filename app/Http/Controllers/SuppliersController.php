@@ -63,4 +63,12 @@ class SuppliersController extends Controller
         }
     }
 
+
+        public function getAccounts($supplierId)
+        {
+            $accounts = SupplierAccount::where('supplier_id', $supplierId)->get();
+            return response()->json($accounts);
+        }
+
+
 }

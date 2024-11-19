@@ -40,6 +40,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                @if($requests->isNotEmpty())
                                     @forelse ($requests as $request)
                                         <tr>
                                             <td>{{ $request->id }}</td>
@@ -58,6 +59,24 @@
                                                 <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">View</button>
                                             </td>
                                         </tr>
+
+                                        <x-request-details-modal
+                                        :category="$request->category"
+                                        :subcategory="$request->subcategory"
+                                        :supplier_name="$request->supplier_name"
+                                        :amount="$request->amount"
+                                        :status="$request->status"
+                                        :requested_date="$request->requested_date"
+                                        :requested_by="$request->requested_by"
+                                        :due_date="$request->due_date"
+                                        :payment_type="$request->payment_type"
+                                        :account_name="$request->account_name"
+                                        :account_number="$request->account_number"
+                                        :bank_name="$request->bank_name"
+                                        :note="$request->note"
+                                        :document_link="$request->document_link"
+                                        />
+
                                     @empty
                                         <tr>
                                             <td colspan="10">
@@ -68,6 +87,7 @@
                                             </td>
                                         </tr>
                                     @endforelse
+                                @endif
                                 </tbody>
                             </table>
                             {{-- @include('requests.partials.view_request_modal')
@@ -80,23 +100,6 @@
     </section>
 </div>
 
-
-<x-request-details-modal
-:category="$request->category"
-:subcategory="$request->subcategory"
-:supplier_name="$request->supplier_name"
-:amount="$request->amount"
-:status="$request->status"
-:requested_date="$request->requested_date"
-:requested_by="$request->requested_by"
-:due_date="$request->due_date"
-:payment_type="$request->payment_type"
-:account_name="$request->account_name"
-:account_number="$request->account_number"
-:bank_name="$request->bank_name"
-:note="$request->note"
-:document_link="$request->document_link"
-/>
 
 <script>
 

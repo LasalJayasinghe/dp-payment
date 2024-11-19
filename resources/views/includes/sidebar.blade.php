@@ -100,14 +100,14 @@
                     </ul>
                 </li>
                 
-                {{-- @can('show requests') --}}
+                @can('show requests')
                 <li class="nav-item">
                     <a href="{{ route('auth.signup') }}" class="nav-link">
                         <i class="nav-icon fa fa-user-plus"></i>
                         <p>Register User</p>
                     </a>
                 </li>
-                {{-- @endcan --}}
+                @endcan
 
                 @can('request status')
                 <li class="nav-item has-treeview">

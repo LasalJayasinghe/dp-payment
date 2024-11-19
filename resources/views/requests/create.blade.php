@@ -5,7 +5,7 @@
 @section('title', 'Dashboard')
 
 @section('content-header')
-<div class="content-wrapper">
+{{-- <div class="content-wrapper"> --}}
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -184,7 +184,7 @@
 
               <div class="form-group">
                 <label for="indicator">Indicator</label>
-                <input type="text" class="form-control" id="indicator" name="indicator">
+                <input type="text" class="form-control" id="indicator" name="indicator" required>
               </div>
 
               <div class="form-group">
@@ -329,7 +329,21 @@ const myDropzone = new Dropzone("#my-dropzone", {
     }
 });
 
-
 </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Calculate the date 14 days from today
+      const currentDate = new Date();
+      const futureDate = new Date(currentDate.setDate(currentDate.getDate() + 14));
+      
+      // Format the date as YYYY-MM-DD
+      const formattedDate = futureDate.toISOString().split('T')[0];
+      
+      // Set the value of the input field
+      document.getElementById('due_date').value = formattedDate;
+  });
+</script>
+
 @endpush
 

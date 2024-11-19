@@ -54,5 +54,6 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/supplier/account', [SuppliersController::class, 'addAccount'])->name('supplier.account');
     Route::get('/supplier/show', [SuppliersController::class, 'showSuppliers'])->name('supplier.show');
     Route::delete('/supplier/{id}', [SuppliersController::class, 'destroy'])->name('supplier.destroy');
+    Route::get('/supplier/{supplierId}/accounts', [SuppliersController::class, 'getAccounts']);
 
 });

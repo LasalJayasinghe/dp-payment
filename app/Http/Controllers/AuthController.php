@@ -60,9 +60,13 @@ class AuthController extends Controller
                 $user->assignRole('admin');
             }elseif($user->role == "user"){
                 $user->assignRole('userRole');
-            }elseif($user->role == "min"){
+            }elseif($user->role == "minAccount"){
                 $user->assignRole('minAcoountRole');
-            }elseif($user->role == "high"){
+            }elseif($user->role == "highAccount"){
+                $user->assignRole('maxAcoountRole');
+            }elseif($user->role == "manager"){
+                $user->assignRole('maxAcoountRole');
+            }elseif($user->role == "account"){
                 $user->assignRole('maxAcoountRole');
             }
 
