@@ -29,18 +29,24 @@
                                 <p style="display: inline; margin-left: 5px;">Add Request</p>
                             </a>
                         </li>
+                        @can('show admin requests')
                         <li class="nav-item">
                             <a href="{{ route('request.show') }}" class="nav-link">
                                 <i class="far fa-list-alt nav-icon"></i>
                                 <p style="display: inline; margin-left: 5px;">Admin Show All</p>
                             </a>
                         </li>
+                        @endcan
+
+                        @can('show requests')
                         <li class="nav-item">
                             <a href="{{ route('request.userRequests') }}" class="nav-link">
                                 <i class="far fa-list-alt nav-icon"></i>
                                 <p style="display: inline; margin-left: 5px;">Show All</p>
                             </a>
                         </li>
+                        @endcan
+
                     </ul>
                 </li>
 
@@ -94,15 +100,16 @@
                     </ul>
                 </li>
                 
-                
-
+                @can('show requests')
                 <li class="nav-item">
                     <a href="{{ route('auth.signup') }}" class="nav-link">
                         <i class="nav-icon fa fa-user-plus"></i>
                         <p>Register User</p>
                     </a>
                 </li>
+                @endcan
 
+                @can('request status')
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-file-alt"></i>
@@ -142,6 +149,7 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
 
             </ul>
         </nav>

@@ -54,8 +54,17 @@ class AuthController extends Controller
             $user->password = Hash::make($request->password);
             $user->email = $request->email;
             $user->role = $request->role;
-
             $user->save();
+
+            if($user->role == "admin"){
+                $user->assignRole('admin');
+            }elseif($user->role == "user"){
+                $user->assignRole('userRole');
+            }elseif($user->role == "min"){
+                $user->assignRole('minAcoountRole');
+            }elseif($user->role == "high"){
+                $user->assignRole('maxAcoountRole');
+            }
 
             return redirect()->route('dashboard')->with('success', 'User added successfully!');
         }

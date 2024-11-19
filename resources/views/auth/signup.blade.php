@@ -60,8 +60,9 @@
                         <option value="">Select Role</option>
                         <option value="admin">Admin</option>
                         <option value="user">User</option>
-                        <option value="superadmin">Super Admin</option>
-                        <option value="accounts">Accounts</option>
+                        <option value="min">Low Account Manager</option>
+                        <option value="high">High Account Manager</option>
+
                     </select>
                     <div class="input-group-append">
                         <div class="input-group-text">
