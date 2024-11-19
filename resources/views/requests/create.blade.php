@@ -184,7 +184,7 @@
 
               <div class="form-group">
                 <label for="indicator">Indicator</label>
-                <input type="text" class="form-control" id="indicator" name="indicator" required>
+                <input type="text" class="form-control" id="indicator" name="indicator">
               </div>
 
               <div class="form-group">

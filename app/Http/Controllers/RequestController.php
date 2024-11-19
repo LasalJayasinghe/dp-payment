@@ -102,7 +102,7 @@ class RequestController extends Controller
             $new_request->status = 'pending';
             $new_request->subcategory = $request->subcategory;
             $new_request->supplier_id = $request->supplier;
-            $new_request->due_date = $new_request->due_date = Carbon::now()->addDays(7);            ;
+            $new_request->due_date = $new_request->due_date = Carbon::now()->addDays(14);            ;
             $new_request->note = $request->note;
             $new_request->priority = $request->priority;
             $new_request->vender_invoice = $request->vender_invoice;
