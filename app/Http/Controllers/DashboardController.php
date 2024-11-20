@@ -14,7 +14,16 @@ class DashboardController extends Controller
         if (Auth::check()) { // Check if user is authenticated
             $user_role = Auth::user()->role; // Access the role attribute
     
-            if ($user_role == 'admin') {
+            if ($user_role == 'user') {
+                
+                $requests = Requests::where(['status' => 'pending' , 'user_id' => Auth::user()->id])->get();
+                foreach ($requests as $request){
+                    $request->supplier_name = Supplier::where('id', $request->supplier_id)->pluck('supplier_name')->first();
+                }
+                return view('user.dashboard' , compact('requests'));
+                
+            } else{
+
                 $requests = Requests::all();
             
                 $pending = $requests->where('status', 'pending')->count();
@@ -31,13 +40,6 @@ class DashboardController extends Controller
                     'approved' => $approved,
                     'rejected' => $rejected,
                 ]);
-            } elseif ($user_role == 'user') {
-
-                $requests = Requests::where(['status' => 'pending' , 'user_id' => Auth::user()->id])->get();
-                foreach ($requests as $request){
-                    $request->supplier_name = Supplier::where('id', $request->supplier_id)->pluck('supplier_name')->first();
-                }
-                return view('user.dashboard' , compact('requests'));
             }
         }
         return redirect()->route('login');

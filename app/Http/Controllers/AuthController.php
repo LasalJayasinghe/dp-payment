@@ -17,25 +17,37 @@ class AuthController extends Controller
     {
         if ($request->isMethod('post')) {
             Log::info("Login attempt", ['email' => $request->email]);
-
+    
             $request->validate([
                 'email' => 'required|email',
                 'password' => 'required|min:6',
             ]);
-
+    
             if (Auth::attempt($request->only('email', 'password'))) {
                 $user = Auth::user();
                 $user->last_login = Carbon::now();
                 $user->save();
+    
+                Log::info("Login successful", ['user_id' => $user->id, 'email' => $user->email]);
+    
                 return redirect()->intended('dashboard')->with('success', 'You are logged in!');
             }
-
+    
+            // Log error for invalid credentials
+            Log::error("Login failed", [
+                'email' => $request->email,
+                'ip' => $request->ip(), // Log the IP address
+                'user_agent' => $request->header('User-Agent'), // Log user agent details
+            ]);
+    
             return back()->withErrors([
                 'email' => 'The provided credentials do not match our records.',
             ])->onlyInput('email');
         }
+    
         return view('auth.login');
     }
+    
 
 
     public function logout()
@@ -65,9 +77,9 @@ class AuthController extends Controller
             }elseif($user->role == "highAccount"){
                 $user->assignRole('maxAcoountRole');
             }elseif($user->role == "manager"){
-                $user->assignRole('maxAcoountRole');
+                $user->assignRole('manager');
             }elseif($user->role == "account"){
-                $user->assignRole('maxAcoountRole');
+                $user->assignRole('account');
             }
 
             return redirect()->route('dashboard')->with('success', 'User added successfully!');

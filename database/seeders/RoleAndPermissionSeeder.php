@@ -18,6 +18,9 @@ class RoleAndPermissionSeeder extends Seeder
             'show admin requests',
             'show requests',
             'add user',
+            'check request',
+            'waiting request',
+            'approve request',
             'low amount requests',
             'higher amount requests',
             'request status',
@@ -33,22 +36,24 @@ class RoleAndPermissionSeeder extends Seeder
         $adminAccount = Role::firstOrCreate(['name' => "admin", 'guard_name' => 'web']);
         $adminAccount->givePermissionTo([
             'show admin requests',
-            'add user',
             'low amount requests',
-            'higher amount requests'
+            'higher amount requests',
+            'check request',
+            'waiting request',
+            'approve request',
         ]);
 
         $minAccount = Role::firstOrCreate(['name' => "minAcoountRole", 'guard_name' => 'web']);
         $minAccount->givePermissionTo([
             'show admin requests',
-            'add user',
+            'check request',
             'low amount requests',
         ]);
 
         $maxAccount = Role::firstOrCreate(['name' => "maxAcoountRole", 'guard_name' => 'web']);
         $maxAccount->givePermissionTo([
             'show admin requests',
-            'add user',
+            'check request',
             'higher amount requests',
         ]);
 
@@ -56,6 +61,20 @@ class RoleAndPermissionSeeder extends Seeder
         $userAccount->givePermissionTo([
             'show requests',
             'request status'
+        ]);
+
+        $account = Role::firstOrCreate(['name' => "account", 'guard_name' => 'web']);
+        $account->givePermissionTo([
+            'show admin requests',
+            'request status',
+            'approve request'
+        ]);
+
+        $manager = Role::firstOrCreate(['name' => "manager", 'guard_name' => 'web']);
+        $manager->givePermissionTo([
+            'show admin requests',
+            'request status',
+            'waiting request'
         ]);
 
     }

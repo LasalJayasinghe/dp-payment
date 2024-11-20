@@ -13,13 +13,15 @@
                     <div class="col-md-6">
                         <p><strong>Request ID:</strong> <span id="requestId"></span></p>
 
+                        @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                         <p><strong>Category:</strong> 
-                            <span id="category"></span>
-                            <select id="category_select" class="form-control mt-2" style="display: inline-block; width: auto; margin-left: 10px;">
-                                <!-- Options will be populated here via JavaScript -->
-                            </select>
-                        </p>
-                        
+                                <span id="category"></span>
+                                <select id="category_select" class="form-control mt-2" style="display: inline-block; width: auto; margin-left: 10px;">
+                                    <!-- Options will be populated here via JavaScript -->
+                                </select>
+                            </p>
+                        @endif
+
                         <p><strong>Subcategory:</strong> <span id="subcategory"></span></p>
                         <p><strong>Supplier Name:</strong> <span id="supplier_name"></span></p>
                         <p><strong>Amount:</strong> <span id="amount"></span></p>
@@ -39,8 +41,17 @@
                 </div>
             </div>
             <div class="modal-footer">
+                @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                 <button type="button" class="btn btn-primary" id="updateRequestBtn">Update Request</button>
-                <button type="button" class="btn btn-primary" onclick="printRequest()">Print Request</button>
+                @endif
+                <a href="{{ route('payment-request.pdf', ['requestId' => '1']) }}" 
+                    class="btn btn-primary" target="_blank">
+                    Generate PDF
+                 </a>
+                 <a href="#" id="generatePdfBtn" class="btn btn-primary" target="_blank">
+                    Generate PDF
+                </a>
+                {{-- <button type="button" class="btn btn-primary" onclick="printRequest()">Print Request</button> --}}
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -51,76 +62,38 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-    function printRequest() {
-        // Initialize jsPDF
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the request ID from the span
+        var requestId = document.getElementById('requestId').innerText;
 
-        // Get the content from the modal
-        const requestId = document.getElementById('requestId').innerText;
-        const category = document.getElementById('category').innerText;
-        const subcategory = document.getElementById('subcategory').innerText;
-        const supplierName = document.getElementById('supplier_name').innerText;
-        const amount = document.getElementById('amount').innerText;
-        const status = document.getElementById('status').innerText;
-        const requestedDate = document.getElementById('requested_date').innerText;
-        const requestedBy = document.getElementById('requested_by').innerText;
-        const dueDate = document.getElementById('due_date').innerText;
-        const paymentType = document.getElementById('payment_type').innerText;
-        const accountName = document.getElementById('account_name').innerText;
-        const accountNumber = document.getElementById('account_number').innerText;
-        const bankName = document.getElementById('bank_name').innerText;
-        const note = document.getElementById('note').innerText;
-        const documentLink = document.getElementById('document_link').href;
+        // Get the "Generate PDF" button and set the href dynamically
+        var pdfLink = document.getElementById('generatePdfBtn');
+        pdfLink.href = "{{ route('payment-request.pdf', ['requestId' => '']) }}".replace('',''+requestId);
+    });
 
-        // Set document title and text
-        doc.setFontSize(12);
-        doc.text("Request Details", 20, 20);
-        
-        // Add content to PDF (adjust positions accordingly)
-        doc.text(`Request ID: ${requestId}`, 20, 30);
-        doc.text(`Category: ${category}`, 20, 40);
-        doc.text(`Subcategory: ${subcategory}`, 20, 50);
-        doc.text(`Supplier Name: ${supplierName}`, 20, 60);
-        doc.text(`Amount: ${amount}`, 20, 70);
-        doc.text(`Status: ${status}`, 20, 80);
-        doc.text(`Requested Date: ${requestedDate}`, 20, 90);
-        doc.text(`Requested By: ${requestedBy}`, 20, 100);
-        doc.text(`Due Date: ${dueDate}`, 20, 110);
-        doc.text(`Payment Type: ${paymentType}`, 20, 120);
-        doc.text(`Account Name: ${accountName}`, 20, 130);
-        doc.text(`Account Number: ${accountNumber}`, 20, 140);
-        doc.text(`Bank Name: ${bankName}`, 20, 150);
-        doc.text(`Note: ${note}`, 20, 160);
-        doc.text(`Document Link: ${documentLink}`, 20, 170);
-
-        // Save the PDF
-        doc.save("request-details.pdf");
-    }
-
-
+    // Ensure categories are populated on modal load
     document.addEventListener('DOMContentLoaded', function () {
-    fetchCategories();
-});
+        fetchCategories();
+    });
 
-function fetchCategories() {
-    fetch('/categories') // Ensure this matches the route name
-        .then(response => response.json())
-        .then(categories => {
-            const categorySelect = document.getElementById('category_select');
-            categorySelect.innerHTML = ''; // Clear existing options
+    // Function to fetch categories from backend
+    function fetchCategories() {
+        fetch('/categories') // Make sure this matches your route
+            .then(response => response.json())
+            .then(categories => {
+                const categorySelect = document.getElementById('category_select');
+                categorySelect.innerHTML = ''; // Clear existing options
 
-            // Populate the dropdown with categories
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.id; // Use `id` for the value
-                option.textContent = category.name; // Display the category name
-                categorySelect.appendChild(option);
+                // Populate the dropdown with categories
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id; // Use `id` for the value
+                    option.textContent = category.name; // Display the category name
+                    categorySelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching categories:', error);
             });
-        })
-        .catch(error => {
-            console.error('Error fetching categories:', error);
-        });
-}
-
+    }
 </script>

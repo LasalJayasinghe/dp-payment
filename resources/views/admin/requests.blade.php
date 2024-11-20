@@ -67,21 +67,21 @@
                                                 
                                             <td class="px-4 py-2">
                                                 <div class="flex items-center space-x-3">
-                                                    @if($request->status == "pending")
+                                                    @if($request->status == "pending" && (Auth::user()->can('check request')))
                                                     <button onclick="checkRequest(this)" class="px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600">
                                                         <i class="fa fa-check"></i>
                                                     </button>
                                                     @endif
 
-                                                    @if($request->status == "checked")
+                                                    @if($request->status == "checked" && (Auth::user()->can('waiting request')))
                                                     <button onclick="waitingForSignature(this)" class="px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600">
                                                         <i class="fa fa-check"></i>
                                                     </button>
 
                                                     @endif
 
-                                                    @if($request->status == "waiting_for_signature")
-                                                    <button onclick="approveRequest(this)" class="px-3 py-2 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                                                    @if($request->status == "waiting_for_signature"  && (Auth::user()->can('approve request')))
+                                                    <button onclick="approveRequest(this)" data-request-id="{{ $request->id }}" class="px-3 py-2 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600">
                                                         <i class="fa fa-check-double"></i>
                                                     </button>
                                                     @endif
@@ -152,6 +152,48 @@
         </div>
     </div>
 </div>
+
+<!-- Approve Request Modal -->
+<div class="modal fade" id="approveRequestModal" tabindex="-1" role="dialog" aria-labelledby="approveRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveRequestModalLabel">Approve Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="approveRequestForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="approveRequestId" name="requestId">
+
+                    <!-- Upload Deposit Slip -->
+                    <div class="form-group">
+                        <label for="depositSlip">Upload Deposit Slip</label>
+                        <input type="file" id="depositSlip" name="depositSlip" class="form-control" accept="image/*,application/pdf">
+                    </div>
+
+                    <!-- Add Check Number -->
+                    <div class="form-group">
+                        <label for="checkNumber">Check Number</label>
+                        <input type="text" id="checkNumber" name="checkNumber" class="form-control">
+                    </div>
+
+                    <!-- Add Voucher Number -->
+                    <div class="form-group">
+                        <label for="voucherNumber">Voucher Number</label>
+                        <input type="text" id="voucherNumber" name="voucherNumber" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="approveRequestBtn">Approve</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <x-request-details-modal
 :category="$request->category"
@@ -307,7 +349,61 @@ function waitingForSignature(button) {
 // Function to handle "Approve" action
 function approveRequest(button) {
     const requestId = getRequestId(button);
-    updateRequestStatus(requestId, 'approved');
+    // Set the hidden input with the request ID
+    document.getElementById('approveRequestId').value = requestId;
+
+    // Show the modal
+    $('#approveRequestModal').modal('show');
+}
+
+document.getElementById('approveRequestBtn').addEventListener('click', function () {
+    const form = document.getElementById('approveRequestForm');
+    const formData = new FormData(form);
+
+    // Send the data to the server
+    fetch('{{ route("request.approve") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Include CSRF token for security
+        },
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Request approved successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'Ok'
+                });
+                // Close the modal
+                $('#approveRequestModal').modal('hide');
+                // Optionally refresh the table or page
+                location.reload();
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Failed to approve the request.',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred while processing the request.',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        });
+});
+
+// Helper function to get request ID
+function getRequestId(button) {
+    return button.getAttribute('data-request-id'); // Assuming the button has a `data-request-id` attribute
 }
 
 // Function to handle "Reject" action (shows modal)

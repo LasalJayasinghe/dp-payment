@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PaymentRequestController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\SuppliersController;
 
@@ -55,5 +56,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/supplier/show', [SuppliersController::class, 'showSuppliers'])->name('supplier.show');
     Route::delete('/supplier/{id}', [SuppliersController::class, 'destroy'])->name('supplier.destroy');
     Route::get('/supplier/{supplierId}/accounts', [SuppliersController::class, 'getAccounts']);
+
+    Route::get('/payment-request/pdf', [PaymentRequestController::class, 'generatePdf'])->name('payment-request.pdf');
+    Route::post('/request/approve', [RequestController::class, 'approveRequest'])->name('request.approve');
 
 });

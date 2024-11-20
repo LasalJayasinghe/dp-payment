@@ -100,7 +100,7 @@
                     </ul>
                 </li>
                 
-                @can('show requests')
+                @can('add user')
                 <li class="nav-item">
                     <a href="{{ route('auth.signup') }}" class="nav-link">
                         <i class="nav-icon fa fa-user-plus"></i>

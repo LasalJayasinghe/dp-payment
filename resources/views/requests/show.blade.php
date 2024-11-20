@@ -115,7 +115,8 @@
         :bank_name="$requests->first()->bank_name"
         :note="$requests->first()->note"
         :document_link="$requests->first()->document_link"
-    />
+        :requestId="$requests->first()->id"
+        />
 @endif
 
 @endsection

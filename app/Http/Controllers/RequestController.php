@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApprovedRequest;
 use App\Models\Category;
 use App\Models\Chat;
 use App\Models\ChatStatus;
@@ -42,12 +43,28 @@ class RequestController extends Controller
             'rejected' => 'danger',
         ];
 
-        if ($user->role == 'admin') {
+        if ($user->can('low amount requests') && $user->can('higher amount requests')) {
                 $requests = Requests::all();
                 foreach($requests as $request){
                     $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
                 }
                 return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
+
+        } elseif ($user->can('low amount requests')){
+
+            $requests = Requests::where('amount', '<=', 5000000)->get();
+            foreach($requests as $request){
+                $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
+            }
+            return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
+
+        } elseif ($user->can('higher amount requests')){
+         
+            $requests = Requests::where('amount', '>', 5000000)->get();
+            foreach($requests as $request){
+                $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
+            }
+            return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
 
         } else {
 
@@ -376,5 +393,45 @@ class RequestController extends Controller
         $files = Files::where('request_id', $requestId)->get();
         return response()->json($files);
     }
+    
+    public function approveRequest(Request $request)
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'requestId' => 'required|exists:requests,id',
+            'checkNumber' => 'nullable|string|max:255',
+            'voucherNumber' => 'nullable|string|max:255',
+            'depositSlip' => 'nullable|file|mimes:jpg,png,pdf|max:2048', // Ensure file is valid
+        ]);
+    
+        try {
+            // Process file upload if present
+            $depositSlipPath = null;
+            if ($request->hasFile('depositSlip')) {
+                $depositSlipPath = $request->file('depositSlip')->store('deposit_slips', 'public'); // Store in 'public/deposit_slips'
+            }
+    
+            $entry = new ApprovedRequest();
+            $entry->request_id = $validated['requestId'];
+            $entry->check_number = $validated['checkNumber'];
+            $entry->voucher_number = $validated['voucherNumber'];
+            $entry->deposit_slip = $depositSlipPath;
+            $entry->approved_at = now();
+            $entry->approved_by = Auth::user()->id; // Assuming a logged-in user is approving the request
+            $entry->save();
+    
+            $data = Requests::findOrFail($validated['requestId']);
+            $data->status = "approved";
+            $data->save();
+    
+            Log::info("Approval Data", [$request->all()]);
+    
+            return response()->json(['success' => true, 'message' => 'Request approved successfully.']);
+        } catch (\Exception $e) {
+            Log::error("Error approving request: ", ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to approve request.']);
+        }
+    }
+    
 
 }
