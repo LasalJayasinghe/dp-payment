@@ -33,7 +33,16 @@
                         <li class="nav-item">
                             <a href="{{ route('request.show') }}" class="nav-link">
                                 <i class="far fa-list-alt nav-icon"></i>
-                                <p style="display: inline; margin-left: 5px;">Admin Show All</p>
+                                <p style="display: inline; margin-left: 5px;">New Requests</p>
+                            </a>
+                        </li>
+                        @endcan
+
+                        @can('show admin requests')
+                        <li class="nav-item">
+                            <a href="{{ route('request.history') }}" class="nav-link">
+                                <i class="far fa-list-alt nav-icon"></i>
+                                <p style="display: inline; margin-left: 5px;">History</p>
                             </a>
                         </li>
                         @endcan
@@ -109,7 +118,7 @@
                 </li>
                 @endcan
 
-                @can('request status')
+                @can('show requests')
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-file-alt"></i>

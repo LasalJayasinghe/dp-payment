@@ -44,13 +44,13 @@
                 @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                 <button type="button" class="btn btn-primary" id="updateRequestBtn">Update Request</button>
                 @endif
-                <a href="{{ route('payment-request.pdf', ['requestId' => '1']) }}" 
+                {{-- <a href="{{ route('payment-request.pdf', ['requestId' => '1']) }}" 
                     class="btn btn-primary" target="_blank">
                     Generate PDF
                  </a>
                  <a href="#" id="generatePdfBtn" class="btn btn-primary" target="_blank">
                     Generate PDF
-                </a>
+                </a> --}}
                 {{-- <button type="button" class="btn btn-primary" onclick="printRequest()">Print Request</button> --}}
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>

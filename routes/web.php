@@ -21,6 +21,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/requests', [RequestController::class, 'index'])->name('request.show');
+    Route::get('/requests/history', [RequestController::class, 'getHistoryRequests'])->name('request.history');
+
     Route::get('/allRequests', [RequestController::class, 'getAllUserRequests'])->name('request.userRequests');
     Route::match(['get', 'post'], '/requests/create', [RequestController::class, 'createRequest'])->name('request.create');
     Route::match(['get', 'post'], '/requests/uploadFiles', [RequestController::class, 'uploadFiles'])->name('request.uploadFiles');

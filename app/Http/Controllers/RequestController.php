@@ -52,7 +52,10 @@ class RequestController extends Controller
 
         } elseif ($user->can('low amount requests')){
 
-            $requests = Requests::where('amount', '<=', 5000000)->get();
+            $requests = Requests::where('status', 'pending')
+            ->where('amount', '<=', 5000000)
+            ->get();
+
             foreach($requests as $request){
                 $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
             }
@@ -60,13 +63,32 @@ class RequestController extends Controller
 
         } elseif ($user->can('higher amount requests')){
          
-            $requests = Requests::where('amount', '>', 5000000)->get();
+            $requests = Requests::where('status', 'pending')
+            ->where('amount', '>', 5000000)
+            ->get();
+
             foreach($requests as $request){
                 $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
             }
             return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
 
-        } else {
+        } elseif ($user->can('waiting request')){
+         
+            $requests = Requests::where('status', 'checked')->get();
+            foreach($requests as $request){
+                $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
+            }
+            return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
+
+        } elseif ($user->can('approve request')){
+         
+            $requests = Requests::where('status', 'waiting_for_signature')->get();
+            foreach($requests as $request){
+                $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
+            }
+            return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
+
+        }else {
 
             Log::info("works" , [$status]);
             $requests = Requests::where('user_id', $user->id)
@@ -78,6 +100,36 @@ class RequestController extends Controller
         }
 
         return view('requests.show', compact('requests', 'heading', 'statusClasses'));
+    }
+
+    public function  getHistoryRequests()
+    {
+        $user = Auth::user();
+
+        if($user->role == "minAccount" || $user->role == "highAccount")
+        {
+            $requests = Requests::where('checked_by', $user->id)->get();
+
+        }elseif($user->role == "manager")
+        {
+            $requests = Requests::where('signed_by', $user->id)->get();
+
+        }elseif($user->role == "account")
+        {
+            $requests = Requests::where('approved_by', $user->id)->get();
+        }elseif( $user->role == "admin")
+        {
+            $requests = Requests::where('approved_by', $user->id)
+            ->orWhere('signed_by', $user->id)
+            ->orWhere('checked_by', $user->id)
+            ->get();
+        }
+
+        foreach($requests as $request){
+            $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
+        }
+
+        return view('requests.history', compact('requests'));
     }
 
     public function getAllUserRequests()
