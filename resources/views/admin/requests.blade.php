@@ -194,7 +194,7 @@
     </div>
 </div>
 
-
+@if($requests->isNotEmpty())
 <x-request-details-modal
 :category="$request->category"
 :subcategory="$request->subcategory"
@@ -211,6 +211,7 @@
 :note="$request->note"
 :document_link="$request->document_link"
 />
+@endif
 
 @endsection
 
