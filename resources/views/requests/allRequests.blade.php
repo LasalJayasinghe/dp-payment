@@ -56,7 +56,49 @@
                                             <td>{{ $request->checked }}</td>
                                             <td>{{ $request->approved }}</td>
                                             <td>
-                                                <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">View</button>
+                                                <div class="flex flex-row space-x-3">
+                                                    <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">View</button>
+                                                   @if(!$request->is_payment_settled)
+                                                        <button class="p-2 bg-blue-500 text-white rounded" onclick="payPendingAmount({{$request->id}})">Pay Pending Balance</button>
+                                                        <div class="modal fade" id="{{$request->id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                            <span aria-hidden="true">&times;</span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                       <form id="form-{{$request->id}}" method="post">
+                                                                           @csrf
+                                                                           <div class="row">
+                                                                               <div class="col-md-3">
+                                                                                   <div class="form-group">
+                                                                                       <label for="due_amount">Due Amount</label>
+                                                                                       <input type="number" class="form-control" id="due_amount" name="due_amount" value="{{$request->due_amount}}" readonly>
+                                                                                   </div>
+                                                                               </div>
+                                                                           </div>
+                                                                           <div class="row">
+                                                                               <div class="col-md-3">
+                                                                                   <div class="form-group">
+                                                                                       <label for="pay_amount">Pay Amount</label>
+                                                                                       <input type="number" class="form-control" id="pay_amount" name="pay_amount">
+                                                                                   </div>
+                                                                               </div>
+                                                                           </div>
+                                                                       </form>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                                        <button type="button" class="btn btn-primary">Save changes</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                   @endif
+                                                </div>
                                             </td>
                                         </tr>
 
@@ -102,17 +144,22 @@
 
 
 <script>
-
+function payPendingAmount(element){
+    $(`#${element}`).modal('show');
+}
 function viewRequest(requestId) {
     $.ajax({
         url: '{{ route("request.details", ":id") }}'.replace(':id', requestId), // Dynamic URL with the requestId
         type: 'GET',
         success: function(data) {
+            console.log(data)
             $('#requestId').text(data.requestId);
             $('#category').text(data.category);
             $('#subcategory').text(data.subcategory);
             $('#supplier_name').text(data.supplier_name);
             $('#amount').text(data.amount);
+            $('#dueAmount').text(data.due_amount);
+            $('#totalPaid').text(data.total_paid);
             $('#status').text(data.status);
             $('#requested_date').text(data.requested_date);
             $('#requested_by').text(data.requested_by);

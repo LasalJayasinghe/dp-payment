@@ -50,7 +50,7 @@
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->created_at }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->due_date }}</td>
                                             <td class="px-4 py-2">
-                                                <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full 
+                                                <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full
                                                     {{ $statusClasses[$request->status] ?? 'bg-gray-400 text-gray-800' }}">
                                                     {{ $request->status }}
                                                 </span>
@@ -64,7 +64,7 @@
                                                         View
                                                     </button>
                                                 </td>
-                                                
+
                                             <td class="px-4 py-2">
                                                 <div class="flex items-center space-x-3">
                                                     @if($request->status == "pending" && (Auth::user()->can('check request')))
@@ -85,20 +85,20 @@
                                                         <i class="fa fa-check-double"></i>
                                                     </button>
                                                     @endif
-                                                    
+
                                                     @if($request->status == "pending" || $request->status == "checked" || $request->status == "waiting_for_signature")
                                                     <button onclick="rejectRequest(this)" class="px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600">
                                                         <i class="fa fa-ban"></i>
                                                     </button>
-                                                    @endif                                            
-                                                    
+                                                    @endif
+
                                                     <button onclick="viewChat({{ $request->id }})" class="px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
                                                         <i class="fas fa-comments"></i>
                                                     </button>
                                                 </div>
                                             </td>
-                                            
-                                            
+
+
                                         </tr>
                                     @empty
                                         <tr>
@@ -239,7 +239,7 @@ function viewDocument(requestId) {
                     `;
                     fileList.appendChild(listItem);
                 });
-            }            
+            }
 
             // Show the modal
             document.getElementById('documentModal').classList.remove('hidden');
@@ -277,6 +277,8 @@ function viewRequest(requestId) {
             $('#subcategory').text(data.subcategory);
             $('#supplier_name').text(data.supplier_name);
             $('#amount').text(data.amount);
+            $('#dueAmount').text(data.due_amount);
+            $('#totalPaid').text(data.total_paid);
             $('#status').text(data.status);
             $('#requested_date').text(data.requested_date);
             $('#requested_by').text(data.requested_by);

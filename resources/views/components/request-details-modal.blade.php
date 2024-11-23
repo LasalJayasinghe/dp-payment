@@ -14,7 +14,7 @@
                         <p><strong>Request ID:</strong> <span id="requestId"></span></p>
 
                         @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
-                        <p><strong>Category:</strong> 
+                        <p><strong>Category:</strong>
                                 <span id="category"></span>
                                 <select id="category_select" class="form-control mt-2" style="display: inline-block; width: auto; margin-left: 10px;">
                                     <!-- Options will be populated here via JavaScript -->
@@ -25,6 +25,8 @@
                         <p><strong>Subcategory:</strong> <span id="subcategory"></span></p>
                         <p><strong>Supplier Name:</strong> <span id="supplier_name"></span></p>
                         <p><strong>Amount:</strong> <span id="amount"></span></p>
+                        <p><strong>Total Paid:</strong> <span id="totalPaid"></span></p>
+                        <p><strong>Due Amount:</strong> <span id="dueAmount"></span></p>
                         <p><strong>Status:</strong> <span id="status"></span></p>
                         <p><strong>Requested Date:</strong> <span id="requested_date"></span></p>
                     </div>
@@ -44,7 +46,7 @@
                 @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                 <button type="button" class="btn btn-primary" id="updateRequestBtn">Update Request</button>
                 @endif
-                {{-- <a href="{{ route('payment-request.pdf', ['requestId' => '1']) }}" 
+                {{-- <a href="{{ route('payment-request.pdf', ['requestId' => '1']) }}"
                     class="btn btn-primary" target="_blank">
                     Generate PDF
                  </a>
@@ -68,7 +70,7 @@
 
         // Get the "Generate PDF" button and set the href dynamically
         var pdfLink = document.getElementById('generatePdfBtn');
-        pdfLink.href = "{{ route('payment-request.pdf', ['requestId' => '']) }}".replace('',''+requestId);
+        pdfLink.href = "{{ route('payment-request.pdf', ['requestId' => ':id']) }}".replace(':id',requestId);
     });
 
     // Ensure categories are populated on modal load

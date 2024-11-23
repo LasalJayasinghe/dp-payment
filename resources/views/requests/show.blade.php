@@ -105,6 +105,7 @@
         :subcategory="$requests->first()->subcategory"
         :supplier_name="$requests->first()->supplier_name"
         :amount="$requests->first()->amount"
+        :dueAmount="$request->first()->due_amount"
         :status="$requests->first()->status"
         :requested_date="$requests->first()->requested_date"
         :requested_by="$requests->first()->requested_by"
@@ -147,7 +148,7 @@ function viewDocument(requestId) {
                     `;
                     fileList.appendChild(listItem);
                 });
-            }            
+            }
 
             // Show the modal
             document.getElementById('documentModal').classList.remove('hidden');
@@ -180,11 +181,14 @@ function viewRequest(requestId) {
         url: '{{ route("request.details", ":id") }}'.replace(':id', requestId), // Dynamic URL with the requestId
         type: 'GET',
         success: function(data) {
+            console.log(data)
             $('#requestId').text(data.requestId);
             $('#category').text(data.category);
             $('#subcategory').text(data.subcategory);
             $('#supplier_name').text(data.supplier_name);
             $('#amount').text(data.amount);
+            $('#dueAmount').text(data.due_amount);
+            $('#totalPaid').text(data.total_paid);
             $('#status').text(data.status);
             $('#requested_date').text(data.requested_date);
             $('#requested_by').text(data.requested_by);

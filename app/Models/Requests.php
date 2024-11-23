@@ -3,9 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Requests extends Model
 {
+
+    const ADVANCE_PAYMENT = "ADVANCE_PAYMENT";
+    const FULL_PAYMENT = "FULL_PAYMENT";
+
     protected static function booted()
     {
         static::created(function ($request) {
@@ -15,5 +20,15 @@ class Requests extends Model
                 'status' => false, // default to "disabled"
             ]);
         });
+    }
+
+    public function subRequestRef(): HasMany
+    {
+        return $this->hasMany(SubRequest::class, 'id', 'request');
+    }
+
+    public function transactionRef(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'id', 'request');
     }
 }
