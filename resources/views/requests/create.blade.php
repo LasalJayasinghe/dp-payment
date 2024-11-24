@@ -196,8 +196,8 @@
                                 <div class="form-group">
                                     <label for="type">Local or Foreign</label>
                                     <select class="form-control" id="type" name="type" required>
-                                        <option value="Local">Local</option>
-                                        <option value="Foreign">Foreign</option>
+                                        <option value="LOCAL">Local</option>
+                                        <option value="FOREIGN">Foreign</option>
                                     </select>
                                 </div>
 

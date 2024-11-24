@@ -97,25 +97,25 @@ class RequestController extends Controller
 
         if($user->role == "minAccount" || $user->role == "highAccount")
         {
-            $requests = Requests::where('checked_by', $user->id)->get();
+            $requests = SubRequest::query()->where('checked_by', $user->id)->get();
 
         }elseif($user->role == "manager")
         {
-            $requests = Requests::where('signed_by', $user->id)->get();
+            $requests = SubRequest::query()->where('signed_by', $user->id)->get();
 
         }elseif($user->role == "account")
         {
-            $requests = Requests::where('approved_by', $user->id)->get();
+            $requests = SubRequest::query()->where('approved_by', $user->id)->get();
         }elseif( $user->role == "admin")
         {
-            $requests = Requests::where('approved_by', $user->id)
+            $requests = SubRequest::query()->where('approved_by', $user->id)
             ->orWhere('signed_by', $user->id)
             ->orWhere('checked_by', $user->id)
             ->get();
         }
 
         foreach($requests as $request){
-            $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
+            $request->supplier_name = Supplier::query()->where('id' , $request->supplier_id)->pluck('supplier_name')->first();
         }
 
         return view('requests.history', compact('requests'));
@@ -144,6 +144,9 @@ class RequestController extends Controller
     public function createRequest(Request $request)
     {
         if ($request->isMethod('post')) {
+            if ($request->amount <  $request->pay_amount){
+                return redirect()->intended(route('dashboard'), 301)->with('error', 'Pay amount cannot grater than amount');
+            }
             try {
                 DB::beginTransaction();
                 $new_request = new Requests();
@@ -157,12 +160,11 @@ class RequestController extends Controller
                 $new_request->note = $request->note;
                 $new_request->priority = $request->priority;
                 $new_request->vender_invoice = $request->vender_invoice;
-
+                $new_request->type = $request->type;
                 $due_amount = ($request->amount - $request->pay_amount);
                 $new_request->due_amount = $due_amount;
 
                 if ($due_amount <= 0){
-                    $new_request->type = Requests::FULL_PAYMENT;
                     $new_request->is_payment_settled = true;
                 }
 
@@ -201,30 +203,32 @@ class RequestController extends Controller
                 $transaction->meta = json_encode($sub_request);
                 $transaction->saveOrFail();
 
-                $uploadedFiles = $request->uploaded_files;
-                $filePaths = explode(',', rtrim($uploadedFiles, ','));
+                if ($request->uploaded_files){
+                    $uploadedFiles = $request->uploaded_files;
+                    $filePaths = explode(',', rtrim($uploadedFiles, ','));
 
-                $validFiles = [];
+                    $validFiles = [];
 
-                // Loop through each file path and check if it exists
-                foreach ($filePaths as $filePath) {
-                    $validFiles[] = $filePath; // Add to valid files array if it exists
-                }
+                    // Loop through each file path and check if it exists
+                    foreach ($filePaths as $filePath) {
+                        $validFiles[] = $filePath; // Add to valid files array if it exists
+                    }
 
-                // Save valid files to the database with the request ID
-                foreach ($validFiles as $validFile) {
-                    Files::create([
-                        'request_id' => $new_request->id,
-                        'sub_request' => $sub_request->id,
-                        'file_path' => $validFile,
-                    ]);
+                    // Save valid files to the database with the request ID
+                    foreach ($validFiles as $validFile) {
+                        Files::query()->create([
+                            'request_id' => $new_request->id,
+                            'sub_request' => $sub_request->id,
+                            'file_path' => $validFile,
+                        ]);
+                    }
                 }
                 DB::commit();
-                return redirect()->route('dashboard')->with('success', 'Request added successfully!');
+                return redirect()->intended(route('dashboard'), 301)->with('success', 'Request added successfully!');
             }catch (\Exception $ex){
                 Log::error("Request Create : ". $ex->getMessage());
                 DB::rollBack();
-                return redirect()->route('dashboard')->with('error', 'Something went wrong!');
+                return redirect()->intended(route('dashboard'), 301)->with('error', 'Something went wrong!');
             }
         }
 
@@ -236,6 +240,9 @@ class RequestController extends Controller
     {
         $latest_request = SubRequest::query()->findOrFail($id);
         if ($request->isMethod('POST')){
+            if ($latest_request->due_amount < $request->pay_amount){
+              return redirect()->intended(route('dashboard'), 301)->with('error', 'Pay amount cannot grater than amount!');
+            }
             try {
                 DB::beginTransaction();
                 $sub_request = new SubRequest();
@@ -277,30 +284,29 @@ class RequestController extends Controller
                 $transaction->meta = json_encode($sub_request);
                 $transaction->saveOrFail();
 
-                $uploadedFiles = $request->uploaded_files;
-                $filePaths = explode(',', rtrim($uploadedFiles, ','));
+               if ($request->hasFile('uploaded_files')){
+                   $uploadedFiles = $request->file('uploaded_files');
+                   $filePaths = explode(',', rtrim($uploadedFiles, ','));
 
-                $validFiles = [];
+                   $validFiles = [];
+                   foreach ($filePaths as $filePath) {
+                       $validFiles[] = $filePath; // Add to valid files array if it exists
+                   }
 
-                // Loop through each file path and check if it exists
-                foreach ($filePaths as $filePath) {
-                    $validFiles[] = $filePath; // Add to valid files array if it exists
-                }
-
-                // Save valid files to the database with the request ID
-                foreach ($validFiles as $validFile) {
-                    Files::create([
-                        'request_id' => $latest_request->request,
-                        'sub_request' => $sub_request->id,
-                        'file_path' => $validFile,
-                    ]);
-                }
+                   foreach ($validFiles as $validFile) {
+                       Files::query()->create([
+                           'request_id' => $latest_request->request,
+                           'sub_request' => $sub_request->id,
+                           'file_path' => $validFile,
+                       ]);
+                   }
+               }
                 DB::commit();
-                return redirect()->route('dashboard')->with('success', 'Request added successfully!');
+                return redirect()->intended(route('dashboard'), 301)->with('success', 'Request added successfully!');
             }catch (\Exception $ex){
                 Log::error("Request Create : ". $ex->getMessage());
                 DB::rollBack();
-                return redirect()->route('dashboard')->with('error', 'Something went wrong!');
+                return redirect()->intended(route('dashboard'), 301)->with('error', 'Something went wrong!');
             }
         }
         $suppliers = Supplier::all();
@@ -544,7 +550,7 @@ class RequestController extends Controller
 
     public function getFiles($requestId)
     {
-        $files = Files::where('request_id', $requestId)->get();
+        $files = Files::query()->where('request_id', $requestId)->get();
         return response()->json($files);
     }
 

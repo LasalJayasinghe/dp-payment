@@ -11,6 +11,9 @@ class Requests extends Model
     const ADVANCE_PAYMENT = "ADVANCE_PAYMENT";
     const FULL_PAYMENT = "FULL_PAYMENT";
 
+    const TYPE_LOCAL = "LOCAL";
+    const TYPE_FOREIGN  = "FOREIGN";
+
     protected static function booted()
     {
         static::created(function ($request) {
