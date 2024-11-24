@@ -580,11 +580,12 @@ class RequestController extends Controller
             $entry->approved_by = Auth::user()->id; // Assuming a logged-in user is approving the request
             $entry->save();
     
-            $data = Requests::findOrFail($validated['requestId']);
-            $data->status = "approved";
-            $data->save();
-    
-            Log::info("Approval Data", [$request->all()]);
+            $data = SubRequest::query()->findOrFail($validated['requestId']);
+            $data->status = SubRequest::STATUS_APPROVED;
+            $data->approved_by = Auth::user()->id;
+            $data->approved_date = Carbon::now();
+            $data->saveOrFail();
+            DB::commit();
     
             return response()->json(['success' => true, 'message' => 'Request approved successfully.']);
         } catch (\Exception $e) {

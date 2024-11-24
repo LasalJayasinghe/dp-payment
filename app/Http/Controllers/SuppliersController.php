@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Requests;
+use App\Models\SubRequest;
 use App\Models\Supplier;
 use App\Models\SupplierAccount;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Psy\SuperglobalsEnv;
@@ -73,27 +75,35 @@ class SuppliersController extends Controller
 
     public function getSupplierReport(REQUEST $request)
     {
-        Log::info("request" , [$request]);
-        $query = Requests::query();
+        $supplierId = $request->input('supplier_id');
 
-        if ($request->filled('supplier_id')) {
-            $query->where('supplier_id', 'like', '%' . $request->supplier_id . '%');
+        $accountsQuery = SupplierAccount::orderBy('supplier_id');
+        if ($supplierId) {
+            $accountsQuery->where('supplier_id', $supplierId);
         }
-    
-        $requests = $query->paginate(10);
+        $accounts = $accountsQuery->get();
 
-        foreach($requests as $request)
-        {
-            $request->supplier = Supplier::where('id' , $request->supplier_id)->pluck('company_name')->first();
-            $request->account =  SupplierAccount::where('id' , $request->account_id)->pluck('account_name')->first();
+        foreach ($accounts as $account) {
+            $subRequestIds = SubRequest::where('account', $account->id)->pluck('id');
 
+            $account->total_payed_amount = Transaction::where('status', Transaction::TRANSACTION_SUCCESS)
+            ->whereIn('sub_request', $subRequestIds) 
+            ->sum('amount');
+        
+            $account->total_amount = Requests::where('status', 'approved')
+                ->where('account_id', $account->id) // Filter by supplier_id
+                ->sum('amount');
+        
+            $account->due_amount = $account->total_amount - $account->total_payed_amount;
+            $account->supplier = Supplier::where('id',$account->supplier_id)->pluck('company_name')->first();
         }
 
-        return view('supplier.report' , compact('requests'));
+        return view('supplier.report' , compact('accounts'));
     }
 
     public function getSuppliers()
     {
+
         $suppliers = Supplier::select('id', 'company_name')->orderBy('company_name')->get();
         return response()->json($suppliers);
     }

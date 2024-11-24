@@ -15,6 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
     @stack('styles')
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -55,6 +56,26 @@
             });
         </script>
     @endif
+
+    @if(session('signatureWarning'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    title: 'Signature Required',
+                    text: 'Please upload your signature to continue.',
+                    icon: 'warning',
+                    confirmButtonText: 'Upload Signature'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to the profile page to upload signature
+                        window.location.href = '{{ route('auth.profile') }}';
+                    }
+                });
+            });
+        </script>
+    @endif
+
+
 
     <!-- Error Alert -->
     @if(session('error'))

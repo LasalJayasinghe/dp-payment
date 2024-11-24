@@ -59,27 +59,29 @@
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
+                                    <th>ID</th>
                                     <th>Supplier</th>
-                                    <th>Account</th>
-                                    <th>Request ID</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Created At</th>
+                                    <th>Account Name</th>
+                                    <th>Bank Name</th>
+                                    <th>Full Amount</th>
+                                    <th>Due Amount</th>
+                                    <th>Paid Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($requests as $request)
+                                @forelse ($accounts as $account)
                                 <tr>
-                                    <td>{{ $request->supplier }}</td>
-                                    <td>{{ $request->account }}</td>
-                                    <td>{{ $request->id }}</td>
-                                    <td>{{ $request->amount }}</td>
-                                    <td>{{ $request->status }}</td>
-                                    <td>{{ $request->created_at }}</td>
+                                    <td>{{ $account->id }}</td>
+                                    <td>{{ $account->supplier }}</td>
+                                    <td>{{ $account->account_name }}</td>
+                                    <td>{{ $account->bank_name }}</td>
+                                    <td>{{ $account->total_amount }}</td>
+                                    <td>{{ $account->due_amount }}</td>
+                                    <td>{{ $account->total_payed_amount }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">No results found.</td>
+                                    <td colspan="8" class="text-center">No results found.</td>
                                 </tr>
                                 @endforelse 
                             </tbody>

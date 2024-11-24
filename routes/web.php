@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ChartController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentRequestController;
 use App\Http\Controllers\RequestController;
@@ -64,5 +65,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payment-request/pdf', [PaymentRequestController::class, 'generatePdf'])->name('payment-request.pdf');
     Route::post('/request/approve', [RequestController::class, 'approveRequest'])->name('request.approve');
+
+    Route::get('/chart-data', [ChartController::class, 'getChartData'])->name('chart.data');
 
 });

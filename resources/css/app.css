@@ -2,3 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+.chart-canvas {
+    height: 300px !important; /* Set a consistent height */
+    max-height: 300px;
+    width: 100%; /* Allow it to adjust to the card's width */
+}

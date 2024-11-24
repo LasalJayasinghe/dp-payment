@@ -29,6 +29,9 @@ class AuthController extends Controller
                 $user->save();
     
                 Log::info("Login successful", ['user_id' => $user->id, 'email' => $user->email]);
+                if (is_null($user->signature) && $user->role != "user") {
+                    return redirect()->route('dashboard')->with('signatureWarning', 'You need to upload your signature!');
+                }
     
                 return redirect()->intended('dashboard')->with('success', 'You are logged in!');
             }
