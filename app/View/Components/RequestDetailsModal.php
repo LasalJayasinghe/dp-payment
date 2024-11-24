@@ -4,6 +4,7 @@ namespace App\View\Components;
 
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 
 class RequestDetailsModal extends Component
@@ -14,10 +15,10 @@ class RequestDetailsModal extends Component
     {
         $this->requestId = $requestId;
     }
-
+    
     public function render()
     {
         return view('components.request-details-modal');
     }
-
+    
 }

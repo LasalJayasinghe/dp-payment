@@ -421,12 +421,28 @@ class RequestController extends Controller
             $this->sendStatusChangeNotification($requestRecord, SubRequest::STATUS_APPROVED);
 
         } elseif ($validated['status'] === SubRequest::STATUS_REJECTED) {
-            $rejectedRequest = new RejectedRequests();
-            $rejectedRequest->request_id = $request->request_id;
-            $rejectedRequest->rejected_by= Auth::id();
+            try {
+                DB::beginTransaction();
+
+                $rejectedRequest = new RejectedRequests();
+                $rejectedRequest->request_id = $request->request_id;
+                $rejectedRequest->rejected_by = Auth::id();  
+                $rejectedRequest->message = $request->reject_message;
+                $rejectedRequest->save();
+
+                $transaction = Transaction::where('sub_request', $request->request_id)->first();
+                $transaction->status = Transaction::TRANSACTION_FAILED;
+                $transaction->updated_by = Auth::id();
+                $transaction->save();
+
+                DB::commit();
             
-            $rejectedRequest->message = $request->reject_message;
-            $rejectedRequest->save();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Transaction failed: ' . $e->getMessage());
+                throw $e;
+            }
+
             $this->sendStatusChangeNotification($requestRecord, SubRequest::STATUS_REJECTED);
 
         }

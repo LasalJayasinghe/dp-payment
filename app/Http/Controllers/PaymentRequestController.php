@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Requests;
 use App\Models\User;
 use TCPDF;
 use Illuminate\Http\Request;
@@ -20,10 +21,12 @@ class PaymentRequestController extends Controller
         $userRole = $loggedInUser->role;
 
         if ($requestId) {
-            $requestDetails = DB::table('requests')
-                ->leftJoin('suppliers', 'requests.supplier_id', '=', 'suppliers.id')
-                ->where('requests.id', $requestId)
+            $requestDetails = DB::table('sub_requests')
+                ->leftJoin('suppliers', 'sub_requests.supplier_id', '=', 'suppliers.id')
+                ->where('sub_requests.id', $requestId)
                 ->first();
+
+                $requestDetails->user_id = Requests::where('id' , $requestDetails->request)->pluck('user_id')->first();
 
             if ($requestDetails) {
                 if ($requestDetails->status === 'rejected') {

@@ -13,14 +13,14 @@
                     <div class="col-md-6">
                         <p><strong>Request ID:</strong> {{$requestId}}</p>
 
-{{--                        @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")--}}
+                       @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                         <p><strong>Category:</strong>
                                 <span id="category"></span>
                                 <select id="category_select" class="form-control mt-2" style="display: inline-block; width: auto; margin-left: 10px;">
                                     <!-- Options will be populated here via JavaScript -->
                                 </select>
                             </p>
-{{--                        @endif--}}
+                       @endif
 
                         <p><strong>ID:</strong> <span id="requestId"></span></p>
                         <p><strong>Subcategory:</strong> <span id="subcategory"></span></p>
@@ -68,15 +68,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Get the request ID from the span
         var requestId = document.getElementById('requestId').innerText;
 
-        // Get the "Generate PDF" button and set the href dynamically
         var pdfLink = document.getElementById('generatePdfBtn');
         pdfLink.href = "{{ route('payment-request.pdf', ['requestId' => ':id']) }}".replace(':id',requestId);
     });
 
-    // Ensure categories are populated on modal load
     document.addEventListener('DOMContentLoaded', function () {
         fetchCategories();
     });
@@ -89,7 +86,6 @@
                 const categorySelect = document.getElementById('category_select');
                 categorySelect.innerHTML = ''; // Clear existing options
 
-                // Populate the dropdown with categories
                 categories.forEach(category => {
                     const option = document.createElement('option');
                     option.value = category.id; // Use `id` for the value

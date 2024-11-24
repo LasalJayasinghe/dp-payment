@@ -293,7 +293,6 @@ function viewRequest(requestId) {
             $('#note').text(data.note);
             $('#document_link').attr('href', data.document_link); // Set the link for the document
 
-            // Show the modal
             $('#viewRequestModal').modal('show');
         },
         error: function() {
