@@ -31,6 +31,8 @@
                                         <th>ID</th>
                                         <th>Supplier Name</th>
                                         <th>Amount</th>
+                                        <th>Due Amount</th>
+                                        <th>Paid Amount</th>
                                         <th>Requested at</th>
                                         <th>Due Date</th>
                                         <th>Status</th>
@@ -44,8 +46,10 @@
                                     @forelse ($requests as $request)
                                         <tr>
                                             <td>{{ $request->id }}</td>
-                                            <td>{{ $request->supplier_name }}</td>
+                                            <td>{{ $request->supplierRef?->supplier_name }}</td>
                                             <td>{{ number_format($request->amount, 2) }}</td>
+                                            <td>{{ number_format($request->due_amount, 2) }}</td>
+                                            <td>{{ number_format($request->paid_amount, 2) }}</td>
                                             <td>{{ $request->created_at }}</td>
                                             <td>{{ $request->due_date }}</td>
                                             <td>
@@ -53,17 +57,22 @@
                                                     {{ $request->status }}
                                                 </span>
                                             </td>
-                                            <td>{{ $request->checked }}</td>
-                                            <td>{{ $request->approved }}</td>
+                                            <td>{{ $request->checkedRef?->name }}</td>
+                                            <td>{{ $request->approvedRef?->name }}</td>
                                             <td>
-                                                <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">View</button>
+                                                <div class="flex flex-row space-x-3">
+                                                    <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">View</button>
+                                                   @if(!$request->requestRef?->is_payment_settled && $request->is_latest && in_array($request->status, [ \App\Models\SubRequest::STATUS_APPROVED, \App\Models\SubRequest::STATUS_REJECTED], TRUE))
+                                                        <a href="{{route('request.settle.update', ['id' => $request->id])}}" class="btn btn-primary">Pay Pending Balance</a>
+                                                   @endif
+                                                </div>
                                             </td>
                                         </tr>
 
                                         <x-request-details-modal
                                         :category="$request->category"
                                         :subcategory="$request->subcategory"
-                                        :supplier_name="$request->supplier_name"
+                                        :supplier_name="$request->supplierRef?->supplier_name"
                                         :amount="$request->amount"
                                         :status="$request->status"
                                         :requested_date="$request->requested_date"
@@ -102,17 +111,22 @@
 
 
 <script>
-
+function payPendingAmount(element){
+    $(`#${element}`).modal('show');
+}
 function viewRequest(requestId) {
     $.ajax({
         url: '{{ route("request.details", ":id") }}'.replace(':id', requestId), // Dynamic URL with the requestId
         type: 'GET',
         success: function(data) {
+            console.log(data)
             $('#requestId').text(data.requestId);
             $('#category').text(data.category);
             $('#subcategory').text(data.subcategory);
             $('#supplier_name').text(data.supplier_name);
             $('#amount').text(data.amount);
+            $('#dueAmount').text(data.due_amount);
+            $('#totalPaid').text(data.total_paid);
             $('#status').text(data.status);
             $('#requested_date').text(data.requested_date);
             $('#requested_by').text(data.requested_by);

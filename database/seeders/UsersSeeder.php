@@ -22,8 +22,6 @@ class UsersSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        $superAdminUser->assignRole('Super Admin');    
-
-    
+        $superAdminUser->assignRole('Super Admin');
     }
 }

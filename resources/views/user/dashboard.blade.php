@@ -172,7 +172,7 @@ function viewDocument(requestId) {
                     `;
                     fileList.appendChild(listItem);
                 });
-            }            
+            }
 
             // Show the modal
             document.getElementById('documentModal').classList.remove('hidden');
@@ -191,7 +191,7 @@ function downloadFile(filePath) {
     const publicPath = `/storage/${filePath}`;
     const link = document.createElement('a');
     link.href = publicPath;
-    link.download = filePath.split('/').pop(); 
+    link.download = filePath.split('/').pop();
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -208,6 +208,8 @@ function viewRequest(requestId) {
             $('#subcategory').text(data.subcategory);
             $('#supplier_name').text(data.supplier_name);
             $('#amount').text(data.amount);
+            $('#dueAmount').text(data.due_amount);
+            $('#totalPaid').text(data.total_paid);
             $('#status').text(data.status);
             $('#requested_date').text(data.requested_date);
             $('#requested_by').text(data.requested_by);

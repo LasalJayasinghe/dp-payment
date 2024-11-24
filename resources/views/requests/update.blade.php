@@ -2,7 +2,7 @@
 
 @extends('layouts.app')
 
-@section('title', 'Request Payment')
+@section('title', 'Pay Pending Request Amount')
 
 @section('content-header')
     {{-- <div class="content-wrapper"> --}}
@@ -32,7 +32,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <form method="POST" action="{{route('request.create')}}" enctype="multipart/form-data">
+                            <form method="POST" action="{{route('request.settle.update', ['id' => $latest_request->id])}}" enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-6">
@@ -173,8 +173,8 @@
                                 <div class="flex flex-row space-x-4">
                                     <div class="form-group" style="width: 200px;">
                                         <label for="amount">Amount (Rs.)</label>
-                                        <input type="number" step="0.01" class="form-control" id="amount" name="amount"
-                                               required>
+                                        <input type="number" step="0.01" class="form-control" id="amount" name="amount" value="{{$latest_request->due_amount}}"
+                                               readonly>
                                     </div>
 
                                     <div class="form-group" style="width: 200px;">

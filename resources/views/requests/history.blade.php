@@ -44,7 +44,7 @@
                                         <tr>
                                             <td>{{ $request->id }}</td>
                                             <td>{{ $request->subcategory }}</td>
-                                            <td>{{ $request->supplier_name }}</td>
+                                            <td>{{ $request->supplierRef?->supplier_name }}</td>
                                             <td>{{ number_format($request->amount, 2) }}</td>
                                             <td>{{ $request->created_at }}</td>
                                             <td>{{ $request->due_date }}</td>
@@ -147,7 +147,7 @@ function viewDocument(requestId) {
                     `;
                     fileList.appendChild(listItem);
                 });
-            }            
+            }
 
             // Show the modal
             document.getElementById('documentModal').classList.remove('hidden');

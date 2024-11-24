@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -12,7 +12,7 @@ Route::match(['get', 'post'], '/', [AuthController::class, 'login'])->name('logi
 Route::match(['get', 'post'], '/signup', [AuthController::class, 'signup'])->name('auth.signup');
 
 Route::middleware('auth')->group(function () {
-    
+
     Route::match(['get', 'post'], '/profile', [AuthController::class, 'profile'])->name('auth.profile');
     Route::post('/upload-signature', [AuthController::class, 'uploadSignature'])->name('auth.profile.signature');
     Route::post('/change-password', [AuthController::class, 'changePassword'])->name('auth.password');
@@ -24,7 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/requests/history', [RequestController::class, 'getHistoryRequests'])->name('request.history');
 
     Route::get('/allRequests', [RequestController::class, 'getAllUserRequests'])->name('request.userRequests');
-    Route::match(['get', 'post'], '/requests/create', [RequestController::class, 'createRequest'])->name('request.create');
+    Route::match(['get', 'post'], '/request/create', [RequestController::class, 'createRequest'])->name('request.create');
+    Route::match(['get', 'post'], '/request/update/{id}', [RequestController::class, 'settledRequest'])->name('request.settle.update');
     Route::match(['get', 'post'], '/requests/uploadFiles', [RequestController::class, 'uploadFiles'])->name('request.uploadFiles');
     Route::post('/request/delete-file', [RequestController::class, 'deleteFile'])->name('request.deleteFile');
 
@@ -49,10 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/requests/waiting-signature', [RequestController::class, 'index'])->name('requests.waiting-signature');
     Route::get('/requests/approved', [RequestController::class, 'index'])->name('requests.approved');
     Route::get('/requests/rejected', [RequestController::class, 'index'])->name('requests.rejected');
-    
+
     Route::match(['get', 'post'], '/category/create', [CategoryController::class, 'createCategory'])->name('category.create');
     Route::get('/category/show', [CategoryController::class, 'showCategory'])->name('category.show');
-    
+
     Route::match(['get', 'post'], '/supplier/create', [SuppliersController::class, 'createSupplier'])->name('supplier.create');
     Route::match(['get', 'post'], '/supplier/account', [SuppliersController::class, 'addAccount'])->name('supplier.account');
     Route::get('/supplier/show', [SuppliersController::class, 'showSuppliers'])->name('supplier.show');

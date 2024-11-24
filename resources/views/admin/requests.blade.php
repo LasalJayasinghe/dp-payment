@@ -32,6 +32,8 @@
                                         <th>Subcategory</th>
                                         <th>Supplier Name</th>
                                         <th>Amount</th>
+                                        <th>Due Amount</th>
+                                        <th>Paid Amount</th>
                                         <th>Requested at</th>
                                         <th>Due Date</th>
                                         <th>Status</th>
@@ -45,12 +47,14 @@
                                         <tr data-request-id="{{ $request->id }}">
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->id }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->subcategory }}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-700">{{ $request->supplier_name }}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-700">{{ number_format($request->amount, 2) }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700">{{ $request->supplierRef?->supplier_name }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700">{{ number_format($request->requestRef?->amount, 2) }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700">{{ number_format($request->due_amount, 2) }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700">{{ number_format($request->paid_amount, 2) }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->created_at }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->due_date }}</td>
                                             <td class="px-4 py-2">
-                                                <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full 
+                                                <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full
                                                     {{ $statusClasses[$request->status] ?? 'bg-gray-400 text-gray-800' }}">
                                                     {{ $request->status }}
                                                 </span>
@@ -64,34 +68,34 @@
                                                         View
                                                     </button>
                                                 </td>
-                                                
+
                                             <td class="px-4 py-2">
                                                 <div class="flex items-center space-x-3">
-                                                    @if($request->status == "pending" && (Auth::user()->can('check request')))
+                                                    @if($request->status == \App\Models\SubRequest::STATUS_PENDING && (Auth::user()->can('check request')))
                                                     <button onclick="checkRequest(this)" class="px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600">
                                                         <i class="fa fa-check"></i>
                                                     </button>
                                                     @endif
 
-                                                    @if($request->status == "checked" && (Auth::user()->can('waiting request')))
+                                                    @if($request->status == \App\Models\SubRequest::STATUS_CHECKED && (Auth::user()->can('waiting request')))
                                                     <button onclick="waitingForSignature(this)" class="px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600">
                                                         <i class="fa fa-check"></i>
                                                     </button>
 
                                                     @endif
 
-                                                    @if($request->status == "waiting_for_signature"  && (Auth::user()->can('approve request')))
+                                                    @if($request->status == \App\Models\SubRequest::STATUS_WAITING_FOR_SIGNATURE  && (Auth::user()->can('approve request')))
                                                     <button onclick="approveRequest(this)" data-request-id="{{ $request->id }}" class="px-3 py-2 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600">
                                                         <i class="fa fa-check-double"></i>
                                                     </button>
                                                     @endif
-                                                    
-                                                    @if($request->status == "pending" || $request->status == "checked" || $request->status == "waiting_for_signature")
+
+                                                    @if($request->status == \App\Models\SubRequest::STATUS_PENDING || $request->status == \App\Models\SubRequest::STATUS_CHECKED || $request->status == \App\Models\SubRequest::STATUS_WAITING_FOR_SIGNATURE)
                                                     <button onclick="rejectRequest(this)" class="px-3 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600">
                                                         <i class="fa fa-ban"></i>
                                                     </button>
-                                                    @endif                                            
-                                                    
+                                                    @endif
+
                                                     <button onclick="viewChat({{ $request->id }})" class="px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
                                                         <i class="fas fa-comments"></i>
                                                     </button>
@@ -238,7 +242,7 @@ function viewDocument(requestId) {
                     `;
                     fileList.appendChild(listItem);
                 });
-            }            
+            }
 
             // Show the modal
             document.getElementById('documentModal').classList.remove('hidden');
@@ -276,6 +280,8 @@ function viewRequest(requestId) {
             $('#subcategory').text(data.subcategory);
             $('#supplier_name').text(data.supplier_name);
             $('#amount').text(data.amount);
+            $('#dueAmount').text(data.due_amount);
+            $('#totalPaid').text(data.total_paid);
             $('#status').text(data.status);
             $('#requested_date').text(data.requested_date);
             $('#requested_by').text(data.requested_by);
@@ -337,13 +343,13 @@ $('#updateRequestBtn').click(function() {
 
 function checkRequest(button) {
     const requestId = getRequestId(button);
-    updateRequestStatus(requestId, 'checked');
+    updateRequestStatus(requestId, '{{\App\Models\SubRequest::STATUS_CHECKED}}');
 }
 
 // Function to handle "Approve" action
 function waitingForSignature(button) {
     const requestId = getRequestId(button);
-    updateRequestStatus(requestId, 'waiting_for_signature');
+    updateRequestStatus(requestId, '{{\App\Models\SubRequest::STATUS_WAITING_FOR_SIGNATURE}}');
 }
 
 // Function to handle "Approve" action
@@ -428,7 +434,7 @@ function getRequestId(button) {
 function submitRejection() {
     const requestId = document.getElementById('rejectRequestId').value;
     const rejectMessage = document.getElementById('rejectMessage').value;
-    updateRequestStatus(requestId, 'rejected', rejectMessage);
+    updateRequestStatus(requestId, '{{\App\Models\SubRequest::STATUS_REJECTED}}', rejectMessage);
     document.getElementById('rejectModal').classList.add('hidden');
 }
 
@@ -443,10 +449,10 @@ function updateRequestStatus(requestId, status, rejectMessage = '') {
         body: JSON.stringify({
             request_id: requestId,
             status: status,
-            checked_by: status === 'checked' ? '{{ Auth::id() }}' : null,
-            approved_by: status === 'approved' ? '{{ Auth::id() }}' : null,
-            rejected_by: status === 'rejected' ? '{{ Auth::id() }}' : null,
-            signatured_by: status === 'waiting_for_signature' ? '{{ Auth::id() }}' : null,
+            checked_by: status === '{{\App\Models\SubRequest::STATUS_CHECKED}}' ? '{{ Auth::id() }}' : null,
+            approved_by: status === '{{\App\Models\SubRequest::STATUS_APPROVED}}' ? '{{ Auth::id() }}' : null,
+            rejected_by: status === '{{\App\Models\SubRequest::STATUS_REJECTED}}' ? '{{ Auth::id() }}' : null,
+            signatured_by: status === '{{\App\Models\SubRequest::STATUS_WAITING_FOR_SIGNATURE}}' ? '{{ Auth::id() }}' : null,
             reject_message: rejectMessage
         })
     })

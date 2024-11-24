@@ -44,7 +44,7 @@
                                         <tr>
                                             <td>{{ $request->id }}</td>
                                             <td>{{ $request->subcategory }}</td>
-                                            <td>{{ $request->supplier_name }}</td>
+                                            <td>{{ $request->supplierRef?->supplier_name }}</td>
                                             <td>{{ number_format($request->amount, 2) }}</td>
                                             <td>{{ $request->created_at }}</td>
                                             <td>{{ $request->due_date }}</td>
@@ -99,25 +99,26 @@
     </div>
 </div>
 
-@if(isset($requests) && $requests->isNotEmpty())
-    <x-request-details-modal
-        :category="$requests->first()->category"
-        :subcategory="$requests->first()->subcategory"
-        :supplier_name="$requests->first()->supplier_name"
-        :amount="$requests->first()->amount"
-        :status="$requests->first()->status"
-        :requested_date="$requests->first()->requested_date"
-        :requested_by="$requests->first()->requested_by"
-        :due_date="$requests->first()->due_date"
-        :payment_type="$requests->first()->payment_type"
-        :account_name="$requests->first()->account_name"
-        :account_number="$requests->first()->account_number"
-        :bank_name="$requests->first()->bank_name"
-        :note="$requests->first()->note"
-        :document_link="$requests->first()->document_link"
-        :requestId="$requests->first()->id"
-        />
-@endif
+{{--@if(isset($requests) && $requests->isNotEmpty())--}}
+{{--    <x-request-details-modal--}}
+{{--        :category="$requests->first()->category"--}}
+{{--        :subcategory="$requests->first()->subcategory"--}}
+{{--        :supplier_name="$requests->first()->supplier_name"--}}
+{{--        :amount="$requests->first()->amount"--}}
+{{--        :dueAmount="$request->first()->due_amount"--}}
+{{--        :status="$requests->first()->status"--}}
+{{--        :requested_date="$requests->first()->requested_date"--}}
+{{--        :requested_by="$requests->first()->requested_by"--}}
+{{--        :due_date="$requests->first()->due_date"--}}
+{{--        :payment_type="$requests->first()->payment_type"--}}
+{{--        :account_name="$requests->first()->account_name"--}}
+{{--        :account_number="$requests->first()->account_number"--}}
+{{--        :bank_name="$requests->first()->bank_name"--}}
+{{--        :note="$requests->first()->note"--}}
+{{--        :document_link="$requests->first()->document_link"--}}
+{{--        :requestId="$requests->first()->id"--}}
+{{--        />--}}
+{{--@endif--}}
 
 @endsection
 
@@ -147,7 +148,7 @@ function viewDocument(requestId) {
                     `;
                     fileList.appendChild(listItem);
                 });
-            }            
+            }
 
             // Show the modal
             document.getElementById('documentModal').classList.remove('hidden');
@@ -180,11 +181,14 @@ function viewRequest(requestId) {
         url: '{{ route("request.details", ":id") }}'.replace(':id', requestId), // Dynamic URL with the requestId
         type: 'GET',
         success: function(data) {
+            console.log(data)
             $('#requestId').text(data.requestId);
             $('#category').text(data.category);
             $('#subcategory').text(data.subcategory);
             $('#supplier_name').text(data.supplier_name);
             $('#amount').text(data.amount);
+            $('#dueAmount').text(data.due_amount);
+            $('#totalPaid').text(data.total_paid);
             $('#status').text(data.status);
             $('#requested_date').text(data.requested_date);
             $('#requested_by').text(data.requested_by);
