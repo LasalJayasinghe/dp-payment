@@ -8,19 +8,16 @@ use Illuminate\View\Component;
 
 class RequestDetailsModal extends Component
 {
-    /**
-     * Create a new component instance.
-     */
-    public function __construct()
+    public $requestId;
+
+    public function __construct($requestId = null)
     {
-        //
+        $this->requestId = $requestId;
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|Closure|string
+    public function render()
     {
         return view('components.request-details-modal');
     }
+
 }

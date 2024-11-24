@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Request ID:</strong> <span id="requestId"></span></p>
+                        <p><strong>Request ID:</strong> {{$requestId}}</p>
 
                         @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                         <p><strong>Category:</strong> 
@@ -22,6 +22,7 @@
                             </p>
                         @endif
 
+                        <p><strong>ID:</strong> <span id="requestId"></span></p>
                         <p><strong>Subcategory:</strong> <span id="subcategory"></span></p>
                         <p><strong>Supplier Name:</strong> <span id="supplier_name"></span></p>
                         <p><strong>Amount:</strong> <span id="amount"></span></p>
@@ -44,10 +45,12 @@
                 @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                 <button type="button" class="btn btn-primary" id="updateRequestBtn">Update Request</button>
                 @endif
-                {{-- <a href="{{ route('payment-request.pdf', ['requestId' => '1']) }}" 
+                <a href="{{ route('payment-request.pdf', ['requestId' => $requestId]) }}" 
                     class="btn btn-primary" target="_blank">
-                    Generate PDF
+                     Generate PDF
                  </a>
+                 
+                 {{-- 
                  <a href="#" id="generatePdfBtn" class="btn btn-primary" target="_blank">
                     Generate PDF
                 </a> --}}

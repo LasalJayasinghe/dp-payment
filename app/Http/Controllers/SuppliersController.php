@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Requests;
 use App\Models\Supplier;
 use App\Models\SupplierAccount;
 use Illuminate\Http\Request;
@@ -69,6 +70,33 @@ class SuppliersController extends Controller
             $accounts = SupplierAccount::where('supplier_id', $supplierId)->get();
             return response()->json($accounts);
         }
+
+    public function getSupplierReport(REQUEST $request)
+    {
+        Log::info("request" , [$request]);
+        $query = Requests::query();
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', 'like', '%' . $request->supplier_id . '%');
+        }
+    
+        $requests = $query->paginate(10);
+
+        foreach($requests as $request)
+        {
+            $request->supplier = Supplier::where('id' , $request->supplier_id)->pluck('company_name')->first();
+            $request->account =  SupplierAccount::where('id' , $request->account_id)->pluck('account_name')->first();
+
+        }
+
+        return view('supplier.report' , compact('requests'));
+    }
+
+    public function getSuppliers()
+    {
+        $suppliers = Supplier::select('id', 'company_name')->orderBy('company_name')->get();
+        return response()->json($suppliers);
+    }
 
 
 }

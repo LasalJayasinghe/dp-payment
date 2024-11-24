@@ -160,6 +160,16 @@
                 </li>
                 @endcan
 
+                                
+                @can('show admin requests')
+                <li class="nav-item">
+                    <a href="{{ route('supplier.report') }}" class="nav-link">
+                        <i class="nav-icon fas fa-file-alt"></i>
+                        <p>Supplier Report</p>
+                    </a>
+                </li>
+                @endcan
+
             </ul>
         </nav>
     </div>

@@ -1,13 +1,21 @@
-<tr>
-    <td colspan="3"><strong>Payment Checked By:</strong></td>
-</tr>
-<tr>
-    <td><strong>Authorized Signatory Name</strong></td>
-    <td><strong>Signature</strong></td>
-    <td><strong>Date</strong></td>
-</tr>
-<tr>
-    <td style="text-align: center;">{{ $checkedBy->fname }}</td>
-    <td style="text-align: center;"><img src="../{{ $checkedBy->signature }}" width="100" /></td>
-    <td style="text-align: center;">{{ $checkedDate }}</td>
-</tr>
+<table border="1" cellpadding="5" width="100%" style="margin-top: 20px;">
+    <tr>
+        <td colspan="3" style="text-align: center;"><strong>Payment Checked By:</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align: center;"><strong>Authorized Signatory Name</strong></td>
+        <td style="text-align: center;"><strong>Signature</strong></td>
+        <td style="text-align: center;"><strong>Date</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align: center;">{{ $checkedBy->fname ?? 'Not Given' }}</td>
+        <td style="text-align: center;">
+            @if(isset($checkedBy->signature))
+                <img src="{{ public_path($checkedBy->signature) }}" width="100" />
+            @else
+                Not Provided
+            @endif
+        </td>
+        <td style="text-align: center;">{{ $checkedDate ?? 'Not Given' }}</td>
+    </tr>
+</table>

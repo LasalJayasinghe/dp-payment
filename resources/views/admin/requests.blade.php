@@ -97,9 +97,27 @@
                                                     </button>
                                                 </div>
                                             </td>
-                                            
-                                            
+                                            @if($requests->isNotEmpty())
+                                            <x-request-details-modal
+                                            :category="$request->category"
+                                            :subcategory="$request->subcategory"
+                                            :supplier_name="$request->supplier_name"
+                                            :amount="$request->amount"
+                                            :status="$request->status"
+                                            :requested_date="$request->requested_date"
+                                            :requested_by="$request->requested_by"
+                                            :due_date="$request->due_date"
+                                            :payment_type="$request->payment_type"
+                                            :account_name="$request->account_name"
+                                            :account_number="$request->account_number"
+                                            :bank_name="$request->bank_name"
+                                            :note="$request->note"
+                                            :document_link="$request->document_link"
+                                            :requestId="$request->id"
+
+                                            />
                                         </tr>
+                                            @endif
                                     @empty
                                         <tr>
                                             <td colspan="10">
@@ -193,25 +211,6 @@
         </div>
     </div>
 </div>
-
-@if($requests->isNotEmpty())
-<x-request-details-modal
-:category="$request->category"
-:subcategory="$request->subcategory"
-:supplier_name="$request->supplier_name"
-:amount="$request->amount"
-:status="$request->status"
-:requested_date="$request->requested_date"
-:requested_by="$request->requested_by"
-:due_date="$request->due_date"
-:payment_type="$request->payment_type"
-:account_name="$request->account_name"
-:account_number="$request->account_number"
-:bank_name="$request->bank_name"
-:note="$request->note"
-:document_link="$request->document_link"
-/>
-@endif
 
 @endsection
 

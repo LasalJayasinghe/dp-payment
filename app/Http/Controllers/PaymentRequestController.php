@@ -1,10 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\User;
 use TCPDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PaymentRequestController extends Controller
 {
@@ -16,15 +19,7 @@ class PaymentRequestController extends Controller
 
         $userRole = $loggedInUser->role;
 
-        // Check if the user has permission to print (Superadmin, Accounts, Admin)
-        // $allowedRoles = ['superadmin', 'accounts', 'admin'];
-
-        // if (!in_array($userRole, $allowedRoles)) {
-        //     return response()->json(['error' => 'You do not have permission to generate a PDF.'], 403);
-        // }
-
         if ($requestId) {
-            // Fetch request details along with supplier address and status
             $requestDetails = DB::table('requests')
                 ->leftJoin('suppliers', 'requests.supplier_id', '=', 'suppliers.id')
                 ->where('requests.id', $requestId)
@@ -39,19 +34,20 @@ class PaymentRequestController extends Controller
                     return response()->json(['error' => 'You do not have permission to view this request.'], 403);
                 }
 
-                $user = DB::table('users')->where('id', $requestDetails->user_id)->first();
+                $user = User::where('id', $requestDetails->user_id)->first();
 
-                // Fetch details for the checked_by user, if any
                 $checkedByHtml = '';
                 if ($requestDetails->checked_by) {
-                    $checkedBy = DB::table('users')->where('id', $requestDetails->checked_by)->first();
+                    $checkedBy = User::where('id', $requestDetails->checked_by)->first();
                     $checkedByHtml = view('pdf.checked_by', ['checkedBy' => $checkedBy, 'checkedDate' => $requestDetails->checked_date])->render();
                 }
 
+                Log::info("requested data" , [$requestDetails]);
                 // Fetch details for the approved_by user, if any
                 $approvedByHtml = '';
                 if ($requestDetails->approved_by) {
-                    $approvedBy = DB::table('users')->where('id', $requestDetails->approved_by)->first();
+                    Log::info("des this work");
+                    $approvedBy = User::where('id', $requestDetails->approved_by)->first();
                     $approvedByHtml = view('pdf.approved_by', ['approvedBy' => $approvedBy, 'approvedDate' => $requestDetails->approved_date])->render();
                 }
 

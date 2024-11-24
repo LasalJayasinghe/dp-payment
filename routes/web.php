@@ -58,6 +58,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/supplier/show', [SuppliersController::class, 'showSuppliers'])->name('supplier.show');
     Route::delete('/supplier/{id}', [SuppliersController::class, 'destroy'])->name('supplier.destroy');
     Route::get('/supplier/{supplierId}/accounts', [SuppliersController::class, 'getAccounts']);
+    Route::get('/supplier/report', [SuppliersController::class, 'getSupplierReport'])->name('supplier.report');
+    Route::get('/suppliers/list', [SuppliersController::class, 'getSuppliers'])->name('suppliers.list');
 
     Route::get('/payment-request/pdf', [PaymentRequestController::class, 'generatePdf'])->name('payment-request.pdf');
     Route::post('/request/approve', [RequestController::class, 'approveRequest'])->name('request.approve');

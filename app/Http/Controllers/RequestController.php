@@ -289,6 +289,7 @@ class RequestController extends Controller
     
     public function updateStatus(Request $request)
     {
+        Log::info("request" , [$request->all()]);
         $validated = $request->validate([
             'request_id' => 'required|integer',
             'status' => 'required|string',
@@ -312,15 +313,15 @@ class RequestController extends Controller
         } elseif ($validated['status'] === 'waiting_for_signature') {
             $requestRecord->signed_by = Auth::id();
 
-        }  elseif ($validated['status'] === 'approved') {
-            $requestRecord->approved_by = Auth::id();
-            $requestRecord->approved_date = Carbon::now();
-            $this->sendStatusChangeNotification($requestRecord, 'approved');
+        // }  elseif ($validated['status'] === 'approved') {
+        //     $requestRecord->approved_by = Auth::id();
+        //     $requestRecord->approved_date = Carbon::now();
 
         } elseif ($validated['status'] === 'rejected') {
             $rejectedRequest = new RejectedRequests();
             $rejectedRequest->request_id = $request->request_id;
             $rejectedRequest->rejected_by= Auth::id();
+            
             $rejectedRequest->message = $request->reject_message;
             $rejectedRequest->save();
             $this->sendStatusChangeNotification($requestRecord, 'rejected');
@@ -474,6 +475,10 @@ class RequestController extends Controller
     
             $data = Requests::findOrFail($validated['requestId']);
             $data->status = "approved";
+            $data->approved_date = Carbon::now();
+            $data->approved_by = Auth::id();
+            $this->sendStatusChangeNotification($data, 'approved');
+
             $data->save();
     
             Log::info("Approval Data", [$request->all()]);
