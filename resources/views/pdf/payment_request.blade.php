@@ -13,13 +13,13 @@
         <td colspan="6">{{ $request->supplier_address ?? 'Not Given' }}</td>
     </tr>
     <tr>
-        <td colspan="2"><strong>Local/ Foreign</strong></td>
+        <td colspan="2"><strong>Payment Type</strong></td>
         <td colspan="6">{{ $request->type ?? 'Not Given' }}</td>
     </tr>
-    <tr>
+    {{-- <tr>
         <td colspan="2"><strong>Payment Type</strong></td>
         <td colspan="6">{{ $request->payment_type ?? 'Not Given' }}</td>
-    </tr>
+    </tr> --}}
     <tr>
         <td colspan="2"><strong>Vendor Invoice #</strong></td>
         <td colspan="6">{{ $request->vender_invoice ?? 'Not Given' }}</td>
@@ -27,6 +27,10 @@
     <tr>
         <td colspan="2"><strong>Date of Invoice</strong></td>
         <td colspan="6">{{ $request->created_at ?? 'Not Given' }}</td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>Description</strong></td>
+        <td colspan="6">{{ $request->note ?? 'Not Given' }}</td>
     </tr>
 </table>
 

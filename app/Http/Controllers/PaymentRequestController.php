@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApprovedRequest;
 use App\Models\Requests;
+use App\Models\Supplier;
+use App\Models\SupplierAccount;
 use App\Models\User;
 use TCPDF;
 use Illuminate\Http\Request;
@@ -27,9 +30,11 @@ class PaymentRequestController extends Controller
                 ->first();
 
                 $requestDetails->user_id = Requests::where('id' , $requestDetails->request)->pluck('user_id')->first();
+                $supplier_id= SupplierAccount::where('id',$requestDetails->account)->pluck('supplier_id')->first();
+                $requestDetails->supplier_address = Supplier::where('id',$supplier_id)->pluck('address')->first();
 
             if ($requestDetails) {
-                if ($requestDetails->status === 'rejected') {
+                if ($requestDetails->status === 'REJECTED') {
                     return response()->json(['error' => 'The payment request has been rejected. PDF cannot be generated.'], 400);
                 }
 
@@ -49,9 +54,9 @@ class PaymentRequestController extends Controller
                 // Fetch details for the approved_by user, if any
                 $approvedByHtml = '';
                 if ($requestDetails->approved_by) {
-                    Log::info("des this work");
+                     $data = ApprovedRequest::where('sub_request' , $requestId)->first();
                     $approvedBy = User::where('id', $requestDetails->approved_by)->first();
-                    $approvedByHtml = view('pdf.approved_by', ['approvedBy' => $approvedBy, 'approvedDate' => $requestDetails->approved_date])->render();
+                    $approvedByHtml = view('pdf.approved_by', ['approvedData' => $data , 'approvedBy' => $approvedBy, 'approvedDate' => $requestDetails->approved_date])->render();
                 }
 
                 // Create a new PDF document

@@ -79,7 +79,7 @@
           <!-- /.card -->
 
                 <!-- Password Change Section -->
-                <div class="card">
+                {{-- <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Change Password</h3>
                     </div>
@@ -101,7 +101,7 @@
                             <button type="submit" name="change_password" class="btn btn-primary">Change Password</button>
                         </form>
                     </div>
-                </div>
+                </div> --}}
 
             </div>
         </div>

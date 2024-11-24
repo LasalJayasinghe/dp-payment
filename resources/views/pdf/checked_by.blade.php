@@ -8,10 +8,10 @@
         <td style="text-align: center;"><strong>Date</strong></td>
     </tr>
     <tr>
-        <td style="text-align: center;">{{ $checkedBy->fname ?? 'Not Given' }}</td>
+        <td style="text-align: center;">{{ $checkedBy->name ?? 'Not Given' }}</td>
         <td style="text-align: center;">
             @if(isset($checkedBy->signature))
-                <img src="{{ public_path($checkedBy->signature) }}" width="100" />
+                <img  src="{{ Storage::url($checkedBy->signature) }}"width="100" />
             @else
                 Not Provided
             @endif
