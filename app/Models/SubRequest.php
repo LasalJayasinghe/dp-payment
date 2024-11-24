@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SubRequest extends Model
@@ -52,6 +53,12 @@ class SubRequest extends Model
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
+
+    public function supplierRef(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
+    }
+
 
     public function updatedByRef(): BelongsTo
     {

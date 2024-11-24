@@ -15,6 +15,7 @@ use App\Models\SupplierAccount;
 use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class RequestController extends Controller
 {
@@ -48,54 +50,37 @@ class RequestController extends Controller
         ];
 
         if ($user->can('low amount requests') && $user->can('higher amount requests')) {
-                $requests = Requests::all();
-                foreach($requests as $request){
-                    $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
-                }
+                $requests = SubRequest::all();
                 return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
 
         } elseif ($user->can('low amount requests')){
 
-            $requests = Requests::where('status', 'pending')
+            $requests = SubRequest::query()->where('status', SubRequest::STATUS_PENDING)
             ->where('amount', '<=', 5000000)
             ->get();
-
-            foreach($requests as $request){
-                $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
-            }
             return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
 
         } elseif ($user->can('higher amount requests')){
 
-            $requests = Requests::where('status', 'pending')
+            $requests = SubRequest::query()->where('status', SubRequest::STATUS_PENDING)
             ->where('amount', '>', 5000000)
             ->get();
 
-            foreach($requests as $request){
-                $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
-            }
             return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
 
         } elseif ($user->can('waiting request')){
 
-            $requests = Requests::where('status', 'checked')->get();
-            foreach($requests as $request){
-                $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
-            }
+            $requests = SubRequest::query()->where('status', SubRequest::STATUS_CHECKED)->get();
             return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
 
         } elseif ($user->can('approve request')){
-
-            $requests = Requests::where('status', 'waiting_for_signature')->get();
-            foreach($requests as $request){
-                $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
-            }
+            $requests = SubRequest::query()->where('status', SubRequest::STATUS_WAITING_FOR_SIGNATURE)->get();
             return view('admin.requests', compact('requests', 'heading', 'statusClasses'));
 
         }else {
 
             Log::info("works" , [$status]);
-            $requests = Requests::where('user_id', $user->id)
+            $requests = SubRequest::query()->where('created_by', $user->id)
                 ->where('status', $status)
                 ->get();
 
@@ -139,15 +124,7 @@ class RequestController extends Controller
     public function getAllUserRequests()
     {
         $user = Auth::user();
-        $requests = Requests::where('user_id' ,$user->id )->get();
-
-        foreach($requests as $request)
-        {
-            $request->supplier_name = Supplier::where('id', $request->supplier_id)->pluck('supplier_name')->first();
-            $request->checked = User::where('id' , $request->checked_by)->pluck('name')->first();
-            $request->approved = User::where('id' , $request->approved_by)->pluck('name')->first();
-        }
-
+        $requests = SubRequest::query()->where('created_by' ,$user->id )->get();
         return view('requests.allRequests', compact('requests'));
     }
 
@@ -164,7 +141,7 @@ class RequestController extends Controller
     }
 
 
-    public function createRequest(REQUEST $request)
+    public function createRequest(Request $request)
     {
         if ($request->isMethod('post')) {
             try {
@@ -176,7 +153,7 @@ class RequestController extends Controller
                 $new_request->status = 'pending';
                 $new_request->subcategory = $request->subcategory;
                 $new_request->supplier_id = $request->supplier;
-                $new_request->due_date = Carbon::parse($new_request->due_date)->addDays(14);            ;
+                $new_request->due_date = Carbon::parse($request->due_date)->addDays(14);            ;
                 $new_request->note = $request->note;
                 $new_request->priority = $request->priority;
                 $new_request->vender_invoice = $request->vender_invoice;
@@ -201,7 +178,7 @@ class RequestController extends Controller
                 $sub_request->paid_amount = $request->pay_amount;
                 $sub_request->subcategory = $request->subcategory;
                 $sub_request->supplier_id = $request->supplier;
-                $sub_request->due_date = Carbon::parse($new_request->due_date)->addDays(14);
+                $sub_request->due_date = $new_request->due_date;
                 $sub_request->note = $request->note;
                 $sub_request->priority = Str::upper($request->priority);
                 $sub_request->vender_invoice = $request->vender_invoice;
@@ -238,6 +215,7 @@ class RequestController extends Controller
                 foreach ($validFiles as $validFile) {
                     Files::create([
                         'request_id' => $new_request->id,
+                        'sub_request' => $sub_request->id,
                         'file_path' => $validFile,
                     ]);
                 }
@@ -252,6 +230,81 @@ class RequestController extends Controller
 
         $suppliers = Supplier::all();
         return view('requests.create' , compact('suppliers'));
+    }
+
+    public function settledRequest(Request $request, int $id):RedirectResponse | View
+    {
+        $latest_request = SubRequest::query()->findOrFail($id);
+        if ($request->isMethod('POST')){
+            try {
+                DB::beginTransaction();
+                $sub_request = new SubRequest();
+                $sub_request->account = $request->account;
+                $sub_request->request = $latest_request->request;
+                $sub_request->amount =  $latest_request->due_amount;
+                $sub_request->due_amount = ($latest_request->due_amount - $request->pay_amount);
+                $sub_request->paid_amount = $request->pay_amount;
+                $sub_request->subcategory = $request->subcategory;
+                $sub_request->supplier_id = $request->supplier;
+                $sub_request->due_date = Carbon::parse($request->due_date)->addDays(14);
+                $sub_request->note = $request->note;
+                $sub_request->priority = Str::upper($request->priority);
+                $sub_request->vender_invoice = $request->vender_invoice;
+                if ($sub_request->due_amount <= 0){
+                    $sub_request->type = Requests::FULL_PAYMENT;
+                    $sub_request->requestRef->is_payment_settled = true;
+                    $sub_request->requestRef->updateOrFail();
+                }
+                $sub_request->indicator = $request->indicator;
+                $sub_request->vender_invoice = $request->vender_invoice;
+                $sub_request->payment_link = $request->payment_link;
+                $sub_request->saveOrFail();
+
+                $latest_request->is_latest = false;
+                $latest_request->updateOrFail();
+
+                $latest_request->requestRef->due_amount = $sub_request->due_amount;
+                $latest_request->requestRef->updateOrFail();
+
+                $transaction = new Transaction();
+                $transaction->request = $latest_request->request;
+                $transaction->sub_request = $sub_request->id;
+                $transaction->amount = $request->pay_amount;
+                if ($sub_request->due_amount > 0){
+                    $transaction->type = Transaction::ADVANCE_PAYMENT;
+                }
+                $transaction->status = Transaction::TRANSACTION_SUCCESS;
+                $transaction->meta = json_encode($sub_request);
+                $transaction->saveOrFail();
+
+                $uploadedFiles = $request->uploaded_files;
+                $filePaths = explode(',', rtrim($uploadedFiles, ','));
+
+                $validFiles = [];
+
+                // Loop through each file path and check if it exists
+                foreach ($filePaths as $filePath) {
+                    $validFiles[] = $filePath; // Add to valid files array if it exists
+                }
+
+                // Save valid files to the database with the request ID
+                foreach ($validFiles as $validFile) {
+                    Files::create([
+                        'request_id' => $latest_request->request,
+                        'sub_request' => $sub_request->id,
+                        'file_path' => $validFile,
+                    ]);
+                }
+                DB::commit();
+                return redirect()->route('dashboard')->with('success', 'Request added successfully!');
+            }catch (\Exception $ex){
+                Log::error("Request Create : ". $ex->getMessage());
+                DB::rollBack();
+                return redirect()->route('dashboard')->with('error', 'Something went wrong!');
+            }
+        }
+        $suppliers = Supplier::all();
+        return view('requests.update' , compact('suppliers', 'latest_request'));
     }
 
     public function uploadFiles(Request $request)
@@ -299,26 +352,22 @@ class RequestController extends Controller
 
     public function getRequestDeatails($id)
     {
-        $request = Requests::where('id' , $id)->first();
-        $request->supplier_name = Supplier::where('id' , $request->supplier_id)->pluck('supplier_name')->first();
-        $request->requested_user = User::where('id' , $request->user_id)->pluck('name')->first();
-        $request->account_name = SupplierAccount::where('supplier_id' , $request->supplier_id)->pluck('account_name')->first();
-        $request->account_number = SupplierAccount::where('supplier_id' , $request->supplier_id)->pluck('account_number')->first();
-        $request->bank_name = SupplierAccount::where('supplier_id' , $request->supplier_id)->pluck('bank_name')->first();
-
-        $total_paid = Transaction::query()->where('request', $request->id)->sum('amount');
+        $request = SubRequest::query()->where('id' , $id)->first();
+        $request->account_name = SupplierAccount::query()->where('supplier_id' , $request->supplier_id)->pluck('account_name')->first();
+        $request->account_number = SupplierAccount::query()->where('supplier_id' , $request->supplier_id)->pluck('account_number')->first();
+        $request->bank_name = SupplierAccount::query()->where('supplier_id' , $request->supplier_id)->pluck('bank_name')->first();
 
         return response()->json([
             'requestId' => $id,
             'category' => $request->category,
             'subcategory' => $request->subcategory,
-            'supplier_name' => $request->supplier_name,
+            'supplier_name' => $request->supplierRef?->supplier_name,
             'amount' => number_format($request->amount, 2),
             'due_amount' => number_format($request->due_amount, 2),
-            'total_paid' => number_format($total_paid, 2),
+            'total_paid' => number_format($request->paid_amount, 2),
             'status' => $request->status,
             'requested_date' => $request->created_at->format('Y-m-d'),
-            'requested_by' => $request->requested_user,
+            'requested_by' => $request->createdByRef?->name,
             'due_date' => $request->due_date,
             'payment_type' => $request->type,
             'account_name' => $request->account_name,
@@ -351,32 +400,32 @@ class RequestController extends Controller
             'reject_message' => 'nullable|string',
         ]);
 
-        $requestRecord = Requests::find($validated['request_id']);
+        $requestRecord = SubRequest::query()->find($validated['request_id']);
         if (!$requestRecord) {
             return response()->json(['success' => false, 'message' => 'Request not found']);
         }
 
         $requestRecord->status = $validated['status'];
-        if ($validated['status'] === 'checked') {
+        if ($validated['status'] === SubRequest::STATUS_CHECKED) {
             $requestRecord->checked_by = Auth::id();
             $requestRecord->checked_date = Carbon::now();
-            $this->sendStatusChangeNotification($requestRecord, 'checked');
+            $this->sendStatusChangeNotification($requestRecord, SubRequest::STATUS_CHECKED);
 
-        } elseif ($validated['status'] === 'waiting_for_signature') {
+        } elseif ($validated['status'] === SubRequest::STATUS_WAITING_FOR_SIGNATURE) {
             $requestRecord->signed_by = Auth::id();
 
-        }  elseif ($validated['status'] === 'approved') {
+        }  elseif ($validated['status'] === SubRequest::STATUS_APPROVED) {
             $requestRecord->approved_by = Auth::id();
             $requestRecord->approved_date = Carbon::now();
-            $this->sendStatusChangeNotification($requestRecord, 'approved');
+            $this->sendStatusChangeNotification($requestRecord, SubRequest::STATUS_APPROVED);
 
-        } elseif ($validated['status'] === 'rejected') {
+        } elseif ($validated['status'] === SubRequest::STATUS_REJECTED) {
             $rejectedRequest = new RejectedRequests();
             $rejectedRequest->request_id = $request->request_id;
             $rejectedRequest->rejected_by= Auth::id();
             $rejectedRequest->message = $request->reject_message;
             $rejectedRequest->save();
-            $this->sendStatusChangeNotification($requestRecord, 'rejected');
+            $this->sendStatusChangeNotification($requestRecord, SubRequest::STATUS_REJECTED);
 
         }
         $requestRecord->save();

@@ -44,7 +44,7 @@
                                     @forelse ($requests as $request)
                                         <tr>
                                             <td>{{ $request->id }}</td>
-                                            <td>{{ $request->supplier_name }}</td>
+                                            <td>{{ $request->supplierRef?->supplier_name }}</td>
                                             <td>{{ number_format($request->amount, 2) }}</td>
                                             <td>{{ $request->created_at }}</td>
                                             <td>{{ $request->due_date }}</td>
@@ -53,50 +53,13 @@
                                                     {{ $request->status }}
                                                 </span>
                                             </td>
-                                            <td>{{ $request->checked }}</td>
-                                            <td>{{ $request->approved }}</td>
+                                            <td>{{ $request->checkedRef?->name }}</td>
+                                            <td>{{ $request->approvedRef?->name }}</td>
                                             <td>
                                                 <div class="flex flex-row space-x-3">
                                                     <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">View</button>
-                                                   @if(!$request->is_payment_settled)
-                                                        <button class="p-2 bg-blue-500 text-white rounded" onclick="payPendingAmount({{$request->id}})">Pay Pending Balance</button>
-                                                        <div class="modal fade" id="{{$request->id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                       <form id="form-{{$request->id}}" method="post">
-                                                                           @csrf
-                                                                           <div class="row">
-                                                                               <div class="col-md-3">
-                                                                                   <div class="form-group">
-                                                                                       <label for="due_amount">Due Amount</label>
-                                                                                       <input type="number" class="form-control" id="due_amount" name="due_amount" value="{{$request->due_amount}}" readonly>
-                                                                                   </div>
-                                                                               </div>
-                                                                           </div>
-                                                                           <div class="row">
-                                                                               <div class="col-md-3">
-                                                                                   <div class="form-group">
-                                                                                       <label for="pay_amount">Pay Amount</label>
-                                                                                       <input type="number" class="form-control" id="pay_amount" name="pay_amount">
-                                                                                   </div>
-                                                                               </div>
-                                                                           </div>
-                                                                       </form>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                                        <button type="button" class="btn btn-primary">Save changes</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                   @if(!$request->requestRef?->is_payment_settled && $request->is_latest)
+                                                        <a href="{{route('request.settle.update', ['id' => $request->id])}}" class="p-2 bg-blue-500 text-white rounded">Pay Pending Balance</a>
                                                    @endif
                                                 </div>
                                             </td>
@@ -105,7 +68,7 @@
                                         <x-request-details-modal
                                         :category="$request->category"
                                         :subcategory="$request->subcategory"
-                                        :supplier_name="$request->supplier_name"
+                                        :supplier_name="$request->supplierRef?->supplier_name"
                                         :amount="$request->amount"
                                         :status="$request->status"
                                         :requested_date="$request->requested_date"
