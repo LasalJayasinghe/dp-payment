@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Request ID:</strong> {{$requestId}}</p>
+                        <p><strong>Request ID:</strong> {{$rq_id}}</p>
 
                        @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                         <p><strong>Category:</strong>
@@ -47,15 +47,15 @@
                 @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                 <button type="button" class="btn btn-primary" id="updateRequestBtn">Update Request</button>
                 @endif
-                <a href="{{ route('payment-request.pdf', ['requestId' => $requestId]) }}" 
+                {{-- <a href="{{ route('payment-request.pdf', ['requestId' => $rq_id]) }}" 
                     class="btn btn-primary" target="_blank">
                      Generate PDF
-                 </a>
+                 </a> --}}
                  
-                 {{-- 
+                 
                  <a href="#" id="generatePdfBtn" class="btn btn-primary" target="_blank">
                     Generate PDF
-                </a> --}}
+                </a>
                 {{-- <button type="button" class="btn btn-primary" onclick="printRequest()">Print Request</button> --}}
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>

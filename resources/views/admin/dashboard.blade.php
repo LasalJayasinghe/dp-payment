@@ -161,22 +161,18 @@
             }
         });
 
-        const suppliers = response.suppliers;
+
+const suppliers = Object.values(response.suppliers);
 
                 const pieLabels = suppliers.map(supplier => supplier.company_name);
                 const pieData = suppliers.map(supplier => parseFloat(supplier.total));
 
-                const pieColors = pieLabels.map(() => getRandomColor());
+                const predefinedColors = [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#66FF66', '#6699FF', '#FF66B2', '#FF6666'
+                ];
+                const pieColors = pieLabels.map((_, i) => predefinedColors[i % predefinedColors.length]);
 
-                // Function to generate random colors
-                function getRandomColor() {
-                    const letters = '0123456789ABCDEF';
-                    let color = '#';
-                    for (let i = 0; i < 6; i++) {
-                        color += letters[Math.floor(Math.random() * 16)];
-                    }
-                    return color;
-                }
 
                 // Prepare Pie Chart data
                 const pieChartData = {

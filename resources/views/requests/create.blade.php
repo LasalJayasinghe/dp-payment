@@ -328,7 +328,6 @@
                 this.on("removedfile", function (file) {
                     console.log("Removing file:", file);
                     if (file.serverFileName) {
-                        // Send request to delete the file
                         axios.post("{{ route('request.deleteFile') }}", {
                             filePath: file.serverFileName
                         })

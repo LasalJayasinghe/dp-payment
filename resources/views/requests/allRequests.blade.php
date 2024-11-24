@@ -68,24 +68,6 @@
                                                 </div>
                                             </td>
                                         </tr>
-
-                                        <x-request-details-modal
-                                        :category="$request->category"
-                                        :subcategory="$request->subcategory"
-                                        :supplier_name="$request->supplierRef?->supplier_name"
-                                        :amount="$request->amount"
-                                        :status="$request->status"
-                                        :requested_date="$request->requested_date"
-                                        :requested_by="$request->requested_by"
-                                        :due_date="$request->due_date"
-                                        :payment_type="$request->payment_type"
-                                        :account_name="$request->account_name"
-                                        :account_number="$request->account_number"
-                                        :bank_name="$request->bank_name"
-                                        :note="$request->note"
-                                        :document_link="$request->document_link"
-                                        />
-
                                     @empty
                                         <tr>
                                             <td colspan="10">
@@ -108,9 +90,18 @@
         </div>
     </section>
 </div>
+<x-request-details-modal/>
 
 
 <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+        var requestId = document.getElementById('requestId').innerText;
+
+        var pdfLink = document.getElementById('generatePdfBtn');
+        pdfLink.href = "{{ route('payment-request.pdf', ['requestId' => ':id']) }}".replace(':id',requestId);
+    });
+    
 function payPendingAmount(element){
     $(`#${element}`).modal('show');
 }

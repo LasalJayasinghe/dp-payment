@@ -206,12 +206,10 @@ class RequestController extends Controller
 
                 $validFiles = [];
 
-                // Loop through each file path and check if it exists
                 foreach ($filePaths as $filePath) {
                     $validFiles[] = $filePath; // Add to valid files array if it exists
                 }
 
-                // Save valid files to the database with the request ID
                 foreach ($validFiles as $validFile) {
                     Files::create([
                         'request_id' => $new_request->id,
@@ -418,7 +416,6 @@ class RequestController extends Controller
         }  elseif ($validated['status'] === SubRequest::STATUS_APPROVED) {
             $requestRecord->approved_by = Auth::id();
             $requestRecord->approved_date = Carbon::now();
-            $this->sendStatusChangeNotification($requestRecord, SubRequest::STATUS_APPROVED);
 
         } elseif ($validated['status'] === SubRequest::STATUS_REJECTED) {
             try {
@@ -453,16 +450,30 @@ class RequestController extends Controller
 
     private function sendStatusChangeNotification($requestRecord, $status)
     {
-        Log::info("request data" , [ $requestRecord]);
-        $requestUserEmail = User::where('id' , $requestRecord->user_id)->pluck('email')->first();
+        Log::info("Request data", [$requestRecord]);
+        
+        // Retrieve emails
+        $requestUserEmail = User::where('id', $requestRecord->created_by)->pluck('email')->first();
         $checkedByEmail = $requestRecord->checked_by
-        ? User::where('id', $requestRecord->checked_by)->pluck('email')->first()
-        : null;
-
-    $approvedByEmail = $requestRecord->approved_by
-        ? User::where('id', $requestRecord->approved_by)->pluck('email')->first()
-        : null;
-
+            ? User::where('id', $requestRecord->checked_by)->pluck('email')->first()
+            : null;
+        $approvedByEmail = $requestRecord->approved_by
+            ? User::where('id', $requestRecord->approved_by)->pluck('email')->first()
+            : null;
+    
+        // CC emails
+        $ccEmails = [];
+        if ($checkedByEmail && $checkedByEmail !== $requestUserEmail) {
+            $ccEmails[] = $checkedByEmail;
+        }
+        if ($approvedByEmail && $approvedByEmail !== $requestUserEmail && $approvedByEmail !== $checkedByEmail) {
+            $ccEmails[] = $approvedByEmail;
+        }
+        Log::info("Request User Email: ", [$requestUserEmail]);
+        Log::info("Checked By Email: ", [$checkedByEmail]);
+        Log::info("Approved By Email: ", [$approvedByEmail]);
+    
+        // Email content
         $emailSubject = "Request #{$requestRecord->id} Status Updated: " . ucfirst($status);
         $emailContent = "
             <html>
@@ -480,35 +491,34 @@ class RequestController extends Controller
                 </ul>
             </body>
             </html>";
-
+    
+        // Send email
         $sendgrid = new \SendGrid(env('SENDGRID_API_KEY'));
-
         $emailMessage = new \SendGrid\Mail\Mail();
-        $emailMessage->setFrom("info@yourdomain.com", "Your App");
+        $emailMessage->setFrom("info@vallibelone.com", "Vallibel One");
         $emailMessage->setSubject($emailSubject);
-        $emailMessage->addTo($requestUserEmail); // Send to request user
-        if ($checkedByEmail) {
-            $emailMessage->addCc($checkedByEmail);
+        $emailMessage->addTo($requestUserEmail);
+    
+        foreach ($ccEmails as $ccEmail) {
+            $emailMessage->addCc($ccEmail);
         }
-        if ($approvedByEmail) {
-            $emailMessage->addCc($approvedByEmail);
-        }
+    
         $emailMessage->addContent("text/html", $emailContent);
-
+    
         try {
             $response = $sendgrid->send($emailMessage);
             if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
-                return true; // Email sent successfully
+                Log::info("Successfully sent email: ", [$response->statusCode()]);
+                return true;
             } else {
-                // Log errors for debugging
-                Log::error("Failed to send email: " . $response->body());
+                Log::error("Failed to send email: ", [$response->statusCode(), $response->body()]);
                 return false;
             }
         } catch (\Exception $e) {
             Log::error('Caught exception: ' . $e->getMessage());
             return false;
         }
-    }
+    }   
 
 
     public function getChatStatus($id)
@@ -602,6 +612,9 @@ class RequestController extends Controller
             $data->approved_date = Carbon::now();
             $data->saveOrFail();
             DB::commit();
+
+            $this->sendStatusChangeNotification($sub_request, SubRequest::STATUS_APPROVED);
+
     
             return response()->json(['success' => true, 'message' => 'Request approved successfully.']);
         } catch (\Exception $e) {
