@@ -552,36 +552,41 @@ class RequestController extends Controller
     {
         // Validate the request
         $validated = $request->validate([
-            'requestId' => 'required|exists:requests,id',
+            'requestId' => 'required|exists:sub_requests,id',
             'checkNumber' => 'nullable|string|max:255',
             'voucherNumber' => 'nullable|string|max:255',
             'depositSlip' => 'nullable|file|mimes:jpg,png,pdf|max:2048', // Ensure file is valid
         ]);
 
+        Log::info("in");
         try {
+            DB::beginTransaction();
             // Process file upload if present
             $depositSlipPath = null;
             if ($request->hasFile('depositSlip')) {
                 $depositSlipPath = $request->file('depositSlip')->store('deposit_slips', 'public'); // Store in 'public/deposit_slips'
             }
 
+            $sub_request = SubRequest::query()->where('id', $validated['requestId'])->firstOrFail();
             $entry = new ApprovedRequest();
-            $entry->request_id = $validated['requestId'];
+            $entry->request_id = $sub_request->request;
+            $entry->sub_request = $sub_request->id;
             $entry->check_number = $validated['checkNumber'];
             $entry->voucher_number = $validated['voucherNumber'];
             $entry->deposit_slip = $depositSlipPath;
             $entry->approved_at = now();
             $entry->approved_by = Auth::user()->id; // Assuming a logged-in user is approving the request
-            $entry->save();
+            $entry->saveOrFail();
 
-            $data = Requests::findOrFail($validated['requestId']);
-            $data->status = "approved";
-            $data->save();
-
-            Log::info("Approval Data", [$request->all()]);
-
+            $data = SubRequest::query()->findOrFail($validated['requestId']);
+            $data->status = SubRequest::STATUS_APPROVED;
+            $data->approved_by = Auth::user()->id;
+            $data->approved_date = Carbon::now();
+            $data->saveOrFail();
+            DB::commit();
             return response()->json(['success' => true, 'message' => 'Request approved successfully.']);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error("Error approving request: ", ['error' => $e->getMessage()]);
             return response()->json(['success' => false, 'message' => 'Failed to approve request.']);
         }

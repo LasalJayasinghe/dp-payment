@@ -31,6 +31,8 @@
                                         <th>ID</th>
                                         <th>Supplier Name</th>
                                         <th>Amount</th>
+                                        <th>Due Amount</th>
+                                        <th>Paid Amount</th>
                                         <th>Requested at</th>
                                         <th>Due Date</th>
                                         <th>Status</th>
@@ -46,6 +48,8 @@
                                             <td>{{ $request->id }}</td>
                                             <td>{{ $request->supplierRef?->supplier_name }}</td>
                                             <td>{{ number_format($request->amount, 2) }}</td>
+                                            <td>{{ number_format($request->due_amount, 2) }}</td>
+                                            <td>{{ number_format($request->paid_amount, 2) }}</td>
                                             <td>{{ $request->created_at }}</td>
                                             <td>{{ $request->due_date }}</td>
                                             <td>
@@ -58,8 +62,8 @@
                                             <td>
                                                 <div class="flex flex-row space-x-3">
                                                     <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">View</button>
-                                                   @if(!$request->requestRef?->is_payment_settled && $request->is_latest)
-                                                        <a href="{{route('request.settle.update', ['id' => $request->id])}}" class="p-2 bg-blue-500 text-white rounded">Pay Pending Balance</a>
+                                                   @if(!$request->requestRef?->is_payment_settled && $request->is_latest && in_array($request->status, [ \App\Models\SubRequest::STATUS_APPROVED, \App\Models\SubRequest::STATUS_REJECTED], TRUE))
+                                                        <a href="{{route('request.settle.update', ['id' => $request->id])}}" class="btn btn-primary">Pay Pending Balance</a>
                                                    @endif
                                                 </div>
                                             </td>

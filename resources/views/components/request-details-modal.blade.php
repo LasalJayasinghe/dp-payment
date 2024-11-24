@@ -13,14 +13,14 @@
                     <div class="col-md-6">
                         <p><strong>Request ID:</strong> <span id="requestId"></span></p>
 
-                        @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
+{{--                        @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")--}}
                         <p><strong>Category:</strong>
                                 <span id="category"></span>
                                 <select id="category_select" class="form-control mt-2" style="display: inline-block; width: auto; margin-left: 10px;">
                                     <!-- Options will be populated here via JavaScript -->
                                 </select>
                             </p>
-                        @endif
+{{--                        @endif--}}
 
                         <p><strong>Subcategory:</strong> <span id="subcategory"></span></p>
                         <p><strong>Supplier Name:</strong> <span id="supplier_name"></span></p>

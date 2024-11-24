@@ -32,6 +32,8 @@
                                         <th>Subcategory</th>
                                         <th>Supplier Name</th>
                                         <th>Amount</th>
+                                        <th>Due Amount</th>
+                                        <th>Paid Amount</th>
                                         <th>Requested at</th>
                                         <th>Due Date</th>
                                         <th>Status</th>
@@ -46,7 +48,9 @@
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->id }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->subcategory }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->supplierRef?->supplier_name }}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-700">{{ number_format($request->amount, 2) }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700">{{ number_format($request->requestRef?->amount, 2) }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700">{{ number_format($request->due_amount, 2) }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700">{{ number_format($request->paid_amount, 2) }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->created_at }}</td>
                                             <td class="px-4 py-2 text-sm text-gray-700">{{ $request->due_date }}</td>
                                             <td class="px-4 py-2">
