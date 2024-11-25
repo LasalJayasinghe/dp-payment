@@ -45,7 +45,7 @@
                         <form method="POST" action="{{ route('login') }}">
                             @csrf
                             <div class="input-group mb-3">
-                                <input type="email" class="form-control" placeholder="Email" id="email" name="email" required>
+                                <input type="email" class="form-control @error('email') is-invalid @enderror" placeholder="Email" id="email" name="email" value="{{ old('email') }}" required>
                                 <div class="input-group-append">
                                     <div class="input-group-text">
                                         <span class="fas fa-user"></span>
@@ -53,12 +53,15 @@
                                 </div>
                             </div>
                             <div class="input-group mb-3">
-                                <input type="password" class="form-control" placeholder="Password" id="password" name="password" required>
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" placeholder="Password" id="password" name="password" required>
                                 <div class="input-group-append">
                                     <div class="input-group-text">
                                         <span class="fas fa-lock"></span>
                                     </div>
                                 </div>
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             @if (env('RECAPTCHA_ENABLED'))
                                 <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}" style="margin-left: 10px;"></div>
@@ -69,7 +72,7 @@
                                     <button type="submit" class="btn btn-primary btn-block">Sign In</button>
                                 </div>
                             </div>
-                        </form>
+                        </form>                        
                     </div>
                 </div>
             </div>
