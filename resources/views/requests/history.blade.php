@@ -99,25 +99,8 @@
     </div>
 </div>
 
-@if(isset($requests) && $requests->isNotEmpty())
-    <x-request-details-modal
-        :category="$requests->first()->category"
-        :subcategory="$requests->first()->subcategory"
-        :supplier_name="$requests->first()->supplier_name"
-        :amount="$requests->first()->amount"
-        :status="$requests->first()->status"
-        :requested_date="$requests->first()->requested_date"
-        :requested_by="$requests->first()->requested_by"
-        :due_date="$requests->first()->due_date"
-        :payment_type="$requests->first()->payment_type"
-        :account_name="$requests->first()->account_name"
-        :account_number="$requests->first()->account_number"
-        :bank_name="$requests->first()->bank_name"
-        :note="$requests->first()->note"
-        :document_link="$requests->first()->document_link"
-        :requestId="$requests->first()->id"
-        />
-@endif
+<x-request-details-modal :id="$request" />
+
 
 @endsection
 

@@ -145,7 +145,7 @@ class RequestController extends Controller
     {
         if ($request->isMethod('post')) {
             if ($request->amount <  $request->pay_amount){
-                return redirect()->intended(route('dashboard'), 301)->with('error', 'Pay amount cannot grater than amount');
+                return redirect()->intended(route('dashboard'), 301)->with('error', 'Pay amount cannot greater than amount');
             }
             try {
                 DB::beginTransaction();
@@ -241,7 +241,7 @@ class RequestController extends Controller
         $latest_request = SubRequest::query()->findOrFail($id);
         if ($request->isMethod('POST')){
             if ($latest_request->due_amount < $request->pay_amount){
-              return redirect()->intended(route('dashboard'), 301)->with('error', 'Pay amount cannot grater than amount!');
+              return redirect()->intended(route('dashboard'), 301)->with('error', 'Pay amount cannot greater than amount!');
             }
             try {
                 DB::beginTransaction();
@@ -387,7 +387,8 @@ class RequestController extends Controller
 
     public function updateRequest(Request $request, $id)
     {
-        $requestData = Requests::findOrFail($id);
+        $subRequest = SubRequest::findOrFail($id);
+        $requestData = Requests::where('id', $subRequest->request)->first();
 
         $requestData->category = $request->category;
         $requestData->save();
@@ -580,7 +581,8 @@ class RequestController extends Controller
 
     public function getFiles($requestId)
     {
-        $files = Files::query()->where('request_id', $requestId)->get();
+        Log::info('get files' , [$requestId]);
+        $files = Files::query()->where('sub_request', $requestId)->get();
         return response()->json($files);
     }
 

@@ -45,6 +45,9 @@
                             <a href="{{ route('supplier.report') }}" class="btn btn-secondary">
                                 Reset
                             </a>
+                            <a href="{{ route('supplier.report.export', request()->query()) }}" class="btn btn-success">
+                                Export as CSV
+                            </a>
                         </div>
                     </div>
                 </form>

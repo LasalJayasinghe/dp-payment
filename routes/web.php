@@ -61,11 +61,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/supplier/{id}', [SuppliersController::class, 'destroy'])->name('supplier.destroy');
     Route::get('/supplier/{supplierId}/accounts', [SuppliersController::class, 'getAccounts']);
     Route::get('/supplier/report', [SuppliersController::class, 'getSupplierReport'])->name('supplier.report');
+    Route::get('/supplier/report/export', [SuppliersController::class, 'exportReport'])->name('supplier.report.export');
     Route::get('/suppliers/list', [SuppliersController::class, 'getSuppliers'])->name('suppliers.list');
+
 
     Route::get('/payment-request/pdf', [PaymentRequestController::class, 'generatePdf'])->name('payment-request.pdf');
     Route::post('/request/approve', [RequestController::class, 'approveRequest'])->name('request.approve');
-
     Route::get('/chart-data', [ChartController::class, 'getChartData'])->name('chart.data');
 
 });

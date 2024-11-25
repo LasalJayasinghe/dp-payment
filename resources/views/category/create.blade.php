@@ -33,12 +33,12 @@
                             <form action="{{ route('category.create') }}" method="POST" id="addCategoryForm">
                                 @csrf <!-- CSRF Token for protection -->
                                 <div class="form-group">
-                                    <label for="categoryName">Category Name</label>
-                                    <input type="text" class="form-control" id="categoryName" name="categoryName" required>
+                                    <label for="categoryName">Category Name*</label>
+                                    <input type="text" class="form-control" id="categoryName" name="categoryName" placeholder = "Enter Category Name" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="categoryDescription">Description</label>
-                                    <input type="text" class="form-control" id="categoryDescription" name="categoryDescription" required>
+                                    <label for="categoryDescription">Description*</label>
+                                    <input type="text" class="form-control" id="categoryDescription" name="categoryDescription"  placeholder = "Enter Category Description" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Add Category</button>
                             </form>

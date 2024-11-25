@@ -31,7 +31,7 @@
             <table class="table table-bordered table-striped">
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>Request ID</th>
                     <th>Subcategory</th>
                     <th>Supplier Name</th>
                     <th>Amount</th>
@@ -85,29 +85,15 @@
                         <button onclick="viewChat({{ $row->id }})" class="btn btn-info">
                             <i class="fas fa-comments"></i> <!-- Font Awesome icon -->
                         </button>
+                        <a href="{{ route('payment-request.pdf', ['requestId' => $row->id]) }}" target="_blank">
+                            <button class="btn btn-info">
+                                <i class="fas fa-download"></i> <!-- Download Icon -->
+                            </button>
+                        </a>
                       </td>
                     </tr>
                   @endforeach
-
-
-                  <x-request-details-modal
-                    :category="$row->category"
-                    :subcategory="$row->subcategory"
-                    :supplier_name="$row->supplier_name"
-                    :amount="$row->amount"
-                    :status="$row->status"
-                    :requested_date="$row->requested_date"
-                    :requested_by="$row->requested_by"
-                    :due_date="$row->due_date"
-                    :payment_type="$row->payment_type"
-                    :account_name="$row->account_name"
-                    :account_number="$row->account_number"
-                    :bank_name="$row->bank_name"
-                    :note="$row->note"
-                    :document_link="$row->document_link"
-                    />
-
-
+                  <x-request-details-modal :id="$row" />
 
                 @else
                   <tr>

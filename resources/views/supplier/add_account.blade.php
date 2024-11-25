@@ -32,29 +32,30 @@
               <form action="{{ route('supplier.account') }}" method="POST">
                 @csrf 
                 <div class="form-group">
-                  <label for="supplierId">Supplier</label>
+                  <label for="supplierId">Supplier*</label>
                   <select class="form-control" id="supplierId" name="supplierId" required>
-                    <option value="">Select Supplier</option>
+                    <option value="" disabled selected>Select Supplier</option>
                     @foreach($suppliers as $supplier)
-                      <option value="{{ $supplier->id }}">{{ $supplier->company_name }}</option>
+                        <option value="{{ $supplier->id }}">{{ $supplier->company_name }}</option>
                     @endforeach
-                  </select>
+                </select>
+                
                 </div>                
                 <div class="form-group">
-                  <label for="accountName">Account Name</label>
-                  <input type="text" class="form-control" id="accountName" name="accountName" required>
+                  <label for="accountName">Account Name*</label>
+                  <input type="text" class="form-control" id="accountName" name="accountName" placeholder="Enter Account Name" required>
                 </div>
                 <div class="form-group">
-                  <label for="accountNumber">Account Number</label>
-                  <input type="text" class="form-control" id="accountNumber" name="accountNumber" required>
+                  <label for="accountNumber">Account Number*</label>
+                  <input type="text" class="form-control" id="accountNumber" name="accountNumber" placeholder="Enter Account Number"  required>
                 </div>
                 <div class="form-group">
-                  <label for="bankName">Bank Name</label>
-                  <input type="text" class="form-control" id="bankName" name="bankName" required>
+                  <label for="bankName">Bank Name*</label>
+                  <input type="text" class="form-control" id="bankName" name="bankName" placeholder="Enter Bank Name"  required>
                 </div>
                 <div class="form-group">
-                  <label for="branch">Branch</label>
-                  <input type="text" class="form-control" id="branch" name="branch" required>
+                  <label for="branch">Branch*</label>
+                  <input type="text" class="form-control" id="branch" name="branch"  placeholder="Enter Branch Name"  required>
                 </div>
                 <button type="submit" class="btn btn-primary">Add Account</button>
               </form>
