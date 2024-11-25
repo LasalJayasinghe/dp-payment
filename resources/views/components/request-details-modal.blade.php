@@ -11,8 +11,6 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Request ID:</strong> {{$rq_id}}</p>
-
                        @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                         <p><strong>Category:</strong>
                                 <span id="category"></span>
@@ -22,7 +20,7 @@
                             </p>
                        @endif
 
-                        <p><strong>ID:</strong> <span id="requestId"></span></p>
+                        <p><strong>Request ID:</strong> <span id="requestId"></span></p>
                         <p><strong>Subcategory:</strong> <span id="subcategory"></span></p>
                         <p><strong>Supplier Name:</strong> <span id="supplier_name"></span></p>
                         <p><strong>Amount:</strong> <span id="amount"></span></p>
@@ -47,15 +45,7 @@
                 @if(Auth::user()->role == "minAccount" || Auth::user()->role == "highAccount")
                 <button type="button" class="btn btn-primary" id="updateRequestBtn">Update Request</button>
                 @endif
-                {{-- <a href="{{ route('payment-request.pdf', ['requestId' => $rq_id]) }}" 
-                    class="btn btn-primary" target="_blank">
-                     Generate PDF
-                 </a> --}}
                  
-                 
-                 <a href="#" id="generatePdfBtn" class="btn btn-primary" target="_blank">
-                    Generate PDF
-                </a>
                 {{-- <button type="button" class="btn btn-primary" onclick="printRequest()">Print Request</button> --}}
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
@@ -67,12 +57,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var requestId = document.getElementById('requestId').innerText;
-
-        var pdfLink = document.getElementById('generatePdfBtn');
-        pdfLink.href = "{{ route('payment-request.pdf', ['requestId' => ':id']) }}".replace(':id',requestId);
-    });
 
     document.addEventListener('DOMContentLoaded', function () {
         fetchCategories();

@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/requests/{id}/update', [RequestController::class, 'updateRequest'])->name('request.update');
     Route::post('/requests/update-status', [RequestController::class, 'updateStatus'])->name('requests.updateStatus');
 
-    Route::get('/files/{requestId}', [RequestController::class, 'getFiles']);
+    Route::get('/files/{requestId}', [RequestController::class, 'getFiles'])->name('documents');
     Route::get('/categories', [CategoryController::class, 'getCategories'])->name('categories.get');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 

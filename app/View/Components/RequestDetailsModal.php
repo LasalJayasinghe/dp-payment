@@ -9,11 +9,11 @@ use Illuminate\View\Component;
 
 class RequestDetailsModal extends Component
 {
-    public $rq_id;
+    public $id;
 
-    public function __construct($rq_id = null)
+    public function __construct($id)
     {
-        $this->rq_id = $rq_id;
+        $this->id = $id;
     }
     
     public function render()

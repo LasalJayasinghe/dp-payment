@@ -67,6 +67,7 @@
                                                     <button onclick="viewRequest({{ $request->id }})" class="px-3 py-1 text-sm font-medium bg-blue-500 text-white rounded hover:bg-blue-600">
                                                         View
                                                     </button>
+                                                    <x-request-details-modal :id="$request" />
                                                 </td>
 
                                             <td class="px-4 py-2">
@@ -99,29 +100,18 @@
                                                     <button onclick="viewChat({{ $request->id }})" class="px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
                                                         <i class="fas fa-comments"></i>
                                                     </button>
+
+                                                    <a href="{{ route('payment-request.pdf', ['requestId' => $request->id]) }}" target="_blank">
+                                                        <button class="px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+                                                            <i class="fas fa-download"></i> <!-- Download Icon -->
+                                                        </button>
+                                                    </a>
+
                                                 </div>
                                             </td>
-                                            @if($requests->isNotEmpty())
-                                            <x-request-details-modal
-                                            :category="$request->category"
-                                            :subcategory="$request->subcategory"
-                                            :supplier_name="$request->supplier_name"
-                                            :amount="$request->amount"
-                                            :status="$request->status"
-                                            :requested_date="$request->requested_date"
-                                            :requested_by="$request->requested_by"
-                                            :due_date="$request->due_date"
-                                            :payment_type="$request->payment_type"
-                                            :account_name="$request->account_name"
-                                            :account_number="$request->account_number"
-                                            :bank_name="$request->bank_name"
-                                            :note="$request->note"
-                                            :document_link="$request->document_link"
-                                            :requestId="$request->id"
 
-                                            />
                                         </tr>
-                                            @endif
+
                                     @empty
                                         <tr>
                                             <td colspan="10">
@@ -222,8 +212,9 @@
 <script>
 
 function viewDocument(requestId) {
-    // Fetch files using AJAX
-    fetch(`/files/${requestId}`)
+    const endpoint = `{{ route('documents', ':requestId') }}`.replace(':requestId', requestId);
+
+    fetch(endpoint)
         .then(response => response.json())
         .then(files => {
             const fileList = document.getElementById('fileList');

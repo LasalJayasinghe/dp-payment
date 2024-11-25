@@ -37,7 +37,7 @@
   <tbody>
       <tr>
           <th style="width: 30%">Full Name</th>
-          <td>{{$user->fname}}</td> 
+          <td>{{$user->name}}</td> 
       </tr>
       <tr>
           <th>Email</th>
@@ -62,10 +62,8 @@
           </td>
       </tr>
       <tr>
-          <th>Access Level</th>
-          <td>
-           
-          </td>
+        <th>Access Level</th>
+        <td>{{ Str::ucfirst($user->role) }}</td>
       </tr>
       <tr>
           <th>Last Login</th>

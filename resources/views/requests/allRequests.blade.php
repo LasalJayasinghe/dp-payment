@@ -67,6 +67,8 @@
                                                    @endif
                                                 </div>
                                             </td>
+                                            <x-request-details-modal :id="$request" />
+
                                         </tr>
                                     @empty
                                         <tr>
@@ -90,7 +92,6 @@
         </div>
     </section>
 </div>
-<x-request-details-modal/>
 
 
 <script>

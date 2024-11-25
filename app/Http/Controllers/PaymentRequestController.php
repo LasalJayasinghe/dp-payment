@@ -53,7 +53,7 @@ class PaymentRequestController extends Controller
                 Log::info("requested data" , [$requestDetails]);
                 // Fetch details for the approved_by user, if any
                 $approvedByHtml = '';
-                if ($requestDetails->approved_by) {
+                if ($requestDetails->approved_by) {;
                      $data = ApprovedRequest::where('sub_request' , $requestId)->first();
                     $approvedBy = User::where('id', $requestDetails->approved_by)->first();
                     $approvedByHtml = view('pdf.approved_by', ['approvedData' => $data , 'approvedBy' => $approvedBy, 'approvedDate' => $requestDetails->approved_date])->render();

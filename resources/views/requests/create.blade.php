@@ -48,7 +48,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group" style="width: 400px;">
-                                            <label for="subcategory">Payment Category</label>
+                                            <label for="subcategory">Payment Category*</label>
                                             <select class="form-control" id="subcategory" name="subcategory" required>
                                                 <option value="dpdigitalmarketing">DP Digital Marketing</option>
                                                 <option value="dpeducation">DP Education</option>
@@ -76,7 +76,7 @@
                                             <div class="input-group">
 
                                                 <select class="form-control" id="supplier" name="supplier" required>
-                                                    <option value="">Select Supplier</option>
+                                                    <option value="">Select Supplier*</option>
                                                     @foreach ($suppliers as $row)
                                                         <option
                                                             value="{{ $row['id'] }}">{{ $row['company_name'] }}</option>
@@ -93,7 +93,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group" id="supplier-accounts-container" style="display: none;">
-                                            <label for="account">Accounts</label>
+                                            <label for="account">Accounts*</label>
                                             <select class="form-control" id="account" name="account" required>
                                                 <option value="">Select Account</option>
                                                 <!-- Accounts will be populated dynamically -->
@@ -165,20 +165,23 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="documents">Upload documents</label>
-                                    <input type="hidden" name="uploaded_files" id="uploaded_files">
-                                    <div class="dropzone" id="my-dropzone"></div>
+                                    <label for="documents">Upload Documents</label>
+                                    <div class="dropzone" id="my-dropzone" style="border: 2px dotted #ccc; width: 100%; padding: 10px; border-radius: 5px; box-sizing: border-box; display: flex; justify-content: center; align-items: center; text-align: center;">
+                                        <input type="hidden" name="uploaded_files" id="uploaded_files">
+                                    </div>
                                 </div>
+                                
+                                
 
                                 <div class="flex flex-row space-x-4">
                                     <div class="form-group" style="width: 200px;">
-                                        <label for="amount">Amount (Rs.)</label>
+                                        <label for="amount">Amount (Rs.)*</label>
                                         <input type="number" step="0.01" class="form-control" id="amount" name="amount"
                                                required>
                                     </div>
 
                                     <div class="form-group" style="width: 200px;">
-                                        <label for="pay_amount">Pay Amount (Rs.)</label>
+                                        <label for="pay_amount">Pay Amount (Rs.)*</label>
                                         <input type="number" step="0.01" class="form-control" id="pay_amount" name="pay_amount"
                                                required>
                                     </div>
@@ -186,7 +189,7 @@
 
                                 <div class="form-group">
                                     <label for="note">Description (Describe the project)</label>
-                                    <textarea class="form-control" id="note" name="note" rows="3" required></textarea>
+                                    <textarea class="form-control" id="note" name="note" rows="3" ></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="vender_invoice">Invoice Number</label>
@@ -194,7 +197,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="type">Local or Foreign</label>
+                                    <label for="type">Local or Foreign*</label>
                                     <select class="form-control" id="type" name="type" required>
                                         <option value="Local">Local</option>
                                         <option value="Foreign">Foreign</option>
@@ -203,7 +206,7 @@
 
                                 <div class="form-group">
                                     <label for="indicator">Indicator</label>
-                                    <input type="text" class="form-control" id="indicator" name="indicator" required>
+                                    <input type="text" class="form-control" id="indicator" name="indicator" >
                                 </div>
 
                                 <div class="form-group">
