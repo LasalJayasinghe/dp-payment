@@ -98,7 +98,9 @@ class SuppliersController extends Controller
             $account->supplier = Supplier::where('id',$account->supplier_id)->pluck('company_name')->first();
         }
 
-        return view('supplier.report' , compact('accounts'));
+        $suppliers = Supplier::all();
+
+        return view('supplier.report' , compact('accounts' , 'suppliers'));
     }
 
 

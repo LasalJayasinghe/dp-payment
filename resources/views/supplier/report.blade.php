@@ -33,18 +33,19 @@
                             <select 
                                 id="supplier-dropdown" 
                                 name="supplier_id" 
-                                class="form-control">
-                                <option value="">-- Select Supplier --</option>
+                                class="form-control"
+                                onchange="this.form.submit()">
+                                <option value="">All Suppliers</option>
+                                @foreach($suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}" 
+                                        {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                        {{ $supplier->company_name }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                         
                         <div class="col-md-4">
-                            <button type="submit" class="btn btn-primary">
-                                Filter
-                            </button>
-                            <a href="{{ route('supplier.report') }}" class="btn btn-secondary">
-                                Reset
-                            </a>
                             <a href="{{ route('supplier.report.export', request()->query()) }}" class="btn btn-success">
                                 Export as CSV
                             </a>
@@ -96,28 +97,5 @@
     </div>
 </section>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Fetch suppliers using AJAX
-        fetch('{{ route("suppliers.list") }}')
-            .then(response => response.json())
-            .then(data => {
-                const dropdown = document.getElementById('supplier-dropdown');
-                data.forEach(supplier => {
-                    const option = document.createElement('option');
-                    option.value = supplier.id;
-                    option.textContent = supplier.company_name;
-                    dropdown.appendChild(option);
-                });
-
-                // Preserve selected value if applicable
-                const selectedSupplier = "{{ request('supplier_id') }}";
-                if (selectedSupplier) {
-                    dropdown.value = selectedSupplier;
-                }
-            })
-            .catch(error => console.error('Error fetching suppliers:', error));
-    });
-</script>
 
 @endsection

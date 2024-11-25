@@ -22,7 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/requests', [RequestController::class, 'index'])->name('request.show');
-    Route::get('/requests/history', [RequestController::class, 'getHistoryRequests'])->name('request.history');
+    // Route::get('/requests/history', [RequestController::class, 'getHistoryRequests'])->name('request.history');
 
     Route::get('/allRequests', [RequestController::class, 'getAllUserRequests'])->name('request.userRequests');
     Route::match(['get', 'post'], '/request/create', [RequestController::class, 'createRequest'])->name('request.create');
@@ -46,11 +46,9 @@ Route::middleware('auth')->group(function () {
     Route::post('requests/send-chat-message/{id}', [RequestController::class, 'sendChatMessage'])->name('requests.sendChatMessage');
     Route::get('/chat/{request_id}', [RequestController::class, 'getMessages'])->name('chat.getMessages');
 
-    Route::get('/requests/pending-check', [RequestController::class, 'index'])->name('requests.pending-check');
-    Route::get('/requests/pending-approval', [RequestController::class, 'index'])->name('requests.pending-approval');
-    Route::get('/requests/waiting-signature', [RequestController::class, 'index'])->name('requests.waiting-signature');
-    Route::get('/requests/approved', [RequestController::class, 'index'])->name('requests.approved');
-    Route::get('/requests/rejected', [RequestController::class, 'index'])->name('requests.rejected');
+    Route::get('/requests/index', [RequestController::class, 'index'])->name('requests.index');
+    Route::get('/requests/hsitory', [RequestController::class, 'history'])->name('requests.history');
+
 
     Route::match(['get', 'post'], '/category/create', [CategoryController::class, 'createCategory'])->name('category.create');
     Route::get('/category/show', [CategoryController::class, 'showCategory'])->name('category.show');

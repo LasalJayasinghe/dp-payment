@@ -27,6 +27,34 @@ use Illuminate\View\View;
 
 class RequestController extends Controller
 {
+    public function history(Request $request)
+    {
+        $user = Auth::user();
+
+        $statusFilter = $request->input('status');
+
+        $query = SubRequest::query();
+    
+        if ($user->role == 'user') {
+            $query->where('created_by', $user->id);
+        } elseif ($user->role == 'highAccount' || $user->role == 'minAccount') {
+            $query->where('checked_by', $user->id);
+        } elseif ($user->role == 'manager') {
+            $query->where('signed_by', $user->id);
+        } elseif ($user->role == 'account') {
+            $query->where('approved_by', $user->id);
+        } elseif ($user->role == 'admin') {
+        }
+    
+        if ($statusFilter) {
+            $query->where('status', $statusFilter);
+        }
+    
+        $requests = $query->get();
+    
+        return view('requests.history', compact('requests'));
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -91,35 +119,35 @@ class RequestController extends Controller
         return view('requests.show', compact('requests', 'heading', 'statusClasses'));
     }
 
-    public function  getHistoryRequests()
-    {
-        $user = Auth::user();
+    // public function  getHistoryRequests()
+    // {
+    //     $user = Auth::user();
 
-        if($user->role == "minAccount" || $user->role == "highAccount")
-        {
-            $requests = SubRequest::query()->where('checked_by', $user->id)->get();
+    //     if($user->role == "minAccount" || $user->role == "highAccount")
+    //     {
+    //         $requests = SubRequest::query()->where('checked_by', $user->id)->get();
 
-        }elseif($user->role == "manager")
-        {
-            $requests = SubRequest::query()->where('signed_by', $user->id)->get();
+    //     }elseif($user->role == "manager")
+    //     {
+    //         $requests = SubRequest::query()->where('signed_by', $user->id)->get();
 
-        }elseif($user->role == "account")
-        {
-            $requests = SubRequest::query()->where('approved_by', $user->id)->get();
-        }elseif( $user->role == "admin")
-        {
-            $requests = SubRequest::query()->where('approved_by', $user->id)
-            ->orWhere('signed_by', $user->id)
-            ->orWhere('checked_by', $user->id)
-            ->get();
-        }
+    //     }elseif($user->role == "account")
+    //     {
+    //         $requests = SubRequest::query()->where('approved_by', $user->id)->get();
+    //     }elseif( $user->role == "admin")
+    //     {
+    //         $requests = SubRequest::query()->where('approved_by', $user->id)
+    //         ->orWhere('signed_by', $user->id)
+    //         ->orWhere('checked_by', $user->id)
+    //         ->get();
+    //     }
 
-        foreach($requests as $request){
-            $request->supplier_name = Supplier::query()->where('id' , $request->supplier_id)->pluck('supplier_name')->first();
-        }
+    //     foreach($requests as $request){
+    //         $request->supplier_name = Supplier::query()->where('id' , $request->supplier_id)->pluck('supplier_name')->first();
+    //     }
 
-        return view('requests.history', compact('requests'));
-    }
+    //     return view('requests.history', compact('requests'));
+    // }
 
     public function getAllUserRequests()
     {

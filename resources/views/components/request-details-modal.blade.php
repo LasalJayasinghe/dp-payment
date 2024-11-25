@@ -26,7 +26,6 @@
                         <p><strong>Amount:</strong> <span id="amount"></span></p>
                         <p><strong>Total Paid:</strong> <span id="totalPaid"></span></p>
                         <p><strong>Due Amount:</strong> <span id="dueAmount"></span></p>
-                        <p><strong>Status:</strong> <span id="status"></span></p>
                         <p><strong>Requested Date:</strong> <span id="requested_date"></span></p>
                     </div>
                     <div class="col-md-6">

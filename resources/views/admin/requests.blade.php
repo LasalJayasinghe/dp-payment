@@ -114,7 +114,7 @@
 
                                     @empty
                                         <tr>
-                                            <td colspan="10">
+                                            <td colspan="12">
                                                 <div id="lottie-container">
                                                     <div id="lottie-animation"></div>
                                                     <p>No data found.</p>

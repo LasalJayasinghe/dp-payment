@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'History')
+@section('title', "Requests Updates")
 
 @section('content')
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0 text-dark">History</h1>
+                    <h1 class="m-0 text-dark">Request Updates</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">History</li>
+                        <li class="breadcrumb-item active">Request Update</li>
                     </ol>
                 </div>
             </div>
@@ -21,6 +21,24 @@
 
     <section class="content">
         <div class="container-fluid">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <!-- Status Filter -->
+                    <form action="{{ route('requests.history') }}" method="GET">
+                        <div class="form-group">
+                            <label for="status">Filter by Status</label>
+                            <select name="status" id="status" class="form-control" onchange="this.form.submit()">
+                                <option value="">All Statuses</option>
+                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                <!-- Add more statuses as needed -->
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -32,7 +50,8 @@
                                         <th>Category</th>
                                         <th>Supplier Name</th>
                                         <th>Amount</th>
-                                        <th>Requested at</th>
+                                        <th>Due Amount</th>
+                                        <th>Paid Amount</th>                                        <th>Requested at</th>
                                         <th>Due Date</th>
                                         <th>Status</th>
                                         <th>Document</th>
@@ -46,6 +65,8 @@
                                             <td>{{ $request->subcategory }}</td>
                                             <td>{{ $request->supplierRef?->supplier_name }}</td>
                                             <td>{{ number_format($request->amount, 2) }}</td>
+                                            <td>{{ number_format($request->due_amount, 2) }}</td>
+                                            <td>{{ number_format($request->paid_amount, 2) }}</td>
                                             <td>{{ $request->created_at }}</td>
                                             <td>{{ $request->due_date }}</td>
                                             <td>
@@ -56,13 +77,22 @@
                                             <td>
                                                 <button onclick="viewDocument('{{ $request->id }}')" class="btn btn-info">View</button>
                                             </td>
-                                            <td>
-                                                <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">View</button>
+                                            <td class="px-4 py-2">
+                                                <button onclick="viewRequest({{ $request->id }})" class="btn btn-info">
+                                                    View
+                                                </button>
+                                                <x-request-details-modal :id="$request" />
+                                                <a href="{{ route('payment-request.pdf', ['requestId' => $request->id]) }}" target="_blank">
+                                                    <button class="btn btn-info">
+                                                        <i class="fas fa-download"></i> <!-- Download Icon -->
+                                                    </button>
+                                                </a>
                                             </td>
+
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="10">
+                                            <td colspan="12">
                                                 <div id="lottie-container">
                                                     <div id="lottie-animation"></div>
                                                     <p>No data found.</p>
@@ -98,8 +128,6 @@
         </div>
     </div>
 </div>
-
-<x-request-details-modal :id="$request" />
 
 
 @endsection
@@ -163,11 +191,14 @@ function viewRequest(requestId) {
         url: '{{ route("request.details", ":id") }}'.replace(':id', requestId), // Dynamic URL with the requestId
         type: 'GET',
         success: function(data) {
+            console.log(data)
             $('#requestId').text(data.requestId);
             $('#category').text(data.category);
             $('#subcategory').text(data.subcategory);
             $('#supplier_name').text(data.supplier_name);
             $('#amount').text(data.amount);
+            $('#dueAmount').text(data.due_amount);
+            $('#totalPaid').text(data.total_paid);
             $('#status').text(data.status);
             $('#requested_date').text(data.requested_date);
             $('#requested_by').text(data.requested_by);

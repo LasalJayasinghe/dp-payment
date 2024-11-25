@@ -38,15 +38,6 @@
                         </li>
                         @endcan
 
-                        @can('show admin requests')
-                        <li class="nav-item">
-                            <a href="{{ route('request.history') }}" class="nav-link">
-                                <i class="far fa-list-alt nav-icon"></i>
-                                <p style="display: inline; margin-left: 5px;">History</p>
-                            </a>
-                        </li>
-                        @endcan
-
                         @can('show requests')
                         <li class="nav-item">
                             <a href="{{ route('request.userRequests') }}" class="nav-link">
@@ -118,53 +109,18 @@
                 </li>
                 @endcan
 
-                @can('show requests')
                 <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-file-alt"></i>
+                    <a href="{{ route('requests.history') }}" class="nav-link">
+                        <i class="fas fa-file-signature nav-icon"></i>
                         <p style="display: inline; margin-left: 5px;">Requests Status</p>
-                        <i class="right fas fa-angle-left" style="margin-left: auto;"></i>
                     </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ route('requests.pending-check') }}" class="nav-link">
-                                <i class="fas fa-check nav-icon"></i>
-                                <p style="display: inline; margin-left: 5px;">Pending Check</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('requests.pending-approval') }}" class="nav-link">
-                                <i class="fas fa-hourglass-half nav-icon"></i>
-                                <p style="display: inline; margin-left: 5px;">Pending Approval</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('requests.waiting-signature') }}" class="nav-link">
-                                <i class="fas fa-file-signature nav-icon"></i>
-                                <p style="display: inline; margin-left: 5px;">Waiting for Signature</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('requests.approved') }}" class="nav-link">
-                                <i class="fas fa-check-circle nav-icon"></i>
-                                <p style="display: inline; margin-left: 5px;">Approved Requests</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('requests.rejected') }}" class="nav-link">
-                                <i class="fas fa-times-circle nav-icon"></i>
-                                <p style="display: inline; margin-left: 5px;">Rejected Requests</p>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
-                @endcan
 
                                 
                 @can('show admin requests')
                 <li class="nav-item">
                     <a href="{{ route('supplier.report') }}" class="nav-link">
-                        <i class="nav-icon fas fa-file-alt"></i>
+                        <i class="fas fa-file-signature nav-icon"></i>
                         <p>Supplier Report</p>
                     </a>
                 </li>
