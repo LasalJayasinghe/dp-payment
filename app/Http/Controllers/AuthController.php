@@ -29,7 +29,7 @@ class AuthController extends Controller
                 $user->save();
     
                 Log::info("Login successful", ['user_id' => $user->id, 'email' => $user->email]);
-                if (is_null($user->signature) && $user->role != "user") {
+                if (is_null($user->signature) ) {
                     return redirect()->route('dashboard')->with('signatureWarning', 'You need to upload your signature!');
                 }
     

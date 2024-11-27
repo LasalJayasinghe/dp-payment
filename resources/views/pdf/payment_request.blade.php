@@ -34,6 +34,25 @@
     </tr>
 </table>
 
+<table border="1" cellpadding="5" width="100%" style="margin-top: 20px;">
+    <tr>
+        <td style="text-align: center;"><strong>Requested User's Name</strong></td>
+        <td style="text-align: center;"><strong>Signature</strong></td>
+        <td style="text-align: center;"><strong>Date</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align: center;">{{ $user->name ?? 'Not Given' }}</td>
+        <td style="text-align: center;">
+            @if(isset($user->signature))
+            <img src="{{ Storage::url($user->signature) }}" width="100" />
+            @else
+                Not Provided
+            @endif
+        </td>
+        <td style="text-align: center;">{{ $request->created_at ?? 'Not Given' }}</td>
+    </tr>
+</table>
+
 {!! $checkedByHtml !!}
 
 <!-- Approved By Section -->
