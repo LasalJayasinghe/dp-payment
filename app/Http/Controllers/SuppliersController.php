@@ -84,16 +84,16 @@ class SuppliersController extends Controller
         $accounts = $accountsQuery->get();
 
         foreach ($accounts as $account) {
-            $subRequestIds = SubRequest::where('account', $account->id)->pluck('id');
-
-            $account->total_payed_amount = Transaction::where('status', Transaction::TRANSACTION_SUCCESS)
-            ->whereIn('sub_request', $subRequestIds) 
+            $account->total_payed_amount = SubRequest::where(['account'=> $account->id , 'status' => SubRequest::STATUS_APPROVED])->sum('paid_amount');
+        
+            $account->total_amount = SubRequest::where([
+                'account' => $account->id,
+                'status' => SubRequest::STATUS_APPROVED,
+            ])
+            ->groupBy('request')
+            ->selectRaw('MAX(amount) as amount')
             ->sum('amount');
-        
-            $account->total_amount = Requests::where('status', 'approved')
-                ->where('account_id', $account->id) // Filter by supplier_id
-                ->sum('amount');
-        
+
             $account->due_amount = $account->total_amount - $account->total_payed_amount;
             $account->supplier = Supplier::where('id',$account->supplier_id)->pluck('company_name')->first();
         }

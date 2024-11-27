@@ -469,6 +469,15 @@ class RequestController extends Controller
                 $transaction->updated_by = Auth::id();
                 $transaction->save();
 
+                $requestRecord->due_amount += $requestRecord->paid_amount;
+                
+                $initial_reqeuest = Requests::where('id', $requestRecord->account)->first();
+                Log::info('request data' , [$initial_reqeuest]);
+                if ($initial_reqeuest) {
+                    $initial_reqeuest->due_amount = ($initial_reqeuest->due_amount ?? 0) + ($requestRecord->paid_amount ?? 0);
+                    $initial_reqeuest->save();
+                }
+
                 DB::commit();
             
             } catch (\Exception $e) {
@@ -649,6 +658,13 @@ class RequestController extends Controller
             $data->approved_by = Auth::user()->id;
             $data->approved_date = Carbon::now();
             $data->saveOrFail();
+
+            $initial_reqeuest = Requests::where('id', $sub_request->id)->first();
+            if($initial_reqeuest->due_amount == 0)
+            {
+                $initial_reqeuest->status = "approved";
+                $initial_reqeuest->saveorFail();
+            }
             DB::commit();
 
             $this->sendStatusChangeNotification($sub_request, SubRequest::STATUS_APPROVED);

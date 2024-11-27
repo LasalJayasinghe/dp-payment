@@ -14,7 +14,8 @@ class ChartController extends Controller
     public function getChartData()
     {
         // Fetch monthly expenses (for the bar chart)
-        $monthlyExpenses = Transaction::selectRaw('SUM(amount) as total, MONTH(created_at) as month, created_by')
+        $monthlyExpenses = SubRequest::selectRaw('SUM(paid_amount) as total, MONTH(created_at) as month, created_by')
+        ->where('status' , SubRequest::STATUS_APPROVED)
         ->whereYear('created_at', Carbon::now()->year)
         ->groupBy('created_by', 'month')
         ->orderBy('created_by')
@@ -31,9 +32,9 @@ class ChartController extends Controller
             {
                 $subRequestIds = SubRequest::where('account', $account->id)->pluck('id');
 
-                $total_payed_amount = Transaction::where('status', Transaction::TRANSACTION_SUCCESS)
-                ->whereIn('sub_request', $subRequestIds) 
-                ->sum('amount');
+                $total_payed_amount = SubRequest::where('status' , SubRequest::STATUS_APPROVED)
+                ->whereIn('id', $subRequestIds) 
+                ->sum('paid_amount');
 
                 $supplier->total += $total_payed_amount;
             }
