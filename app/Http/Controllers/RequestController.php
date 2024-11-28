@@ -34,7 +34,7 @@ class RequestController extends Controller
         $statusFilter = $request->input('status');
 
         $query = SubRequest::query();
-    
+
         if ($user->role == 'user') {
             $query->where('created_by', $user->id);
         } elseif ($user->role == 'highAccount' || $user->role == 'minAccount') {
@@ -45,13 +45,13 @@ class RequestController extends Controller
             $query->where('approved_by', $user->id);
         } elseif ($user->role == 'admin') {
         }
-    
+
         if ($statusFilter) {
             $query->where('status', $statusFilter);
         }
-    
+
         $requests = $query->get();
-    
+
         return view('requests.history', compact('requests'));
     }
 
@@ -460,7 +460,7 @@ class RequestController extends Controller
 
                 $rejectedRequest = new RejectedRequests();
                 $rejectedRequest->request_id = $request->request_id;
-                $rejectedRequest->rejected_by = Auth::id();  
+                $rejectedRequest->rejected_by = Auth::id();
                 $rejectedRequest->message = $request->reject_message;
                 $rejectedRequest->save();
 
@@ -470,7 +470,7 @@ class RequestController extends Controller
                 $transaction->save();
 
                 $requestRecord->due_amount += $requestRecord->paid_amount;
-                
+
                 $initial_reqeuest = Requests::where('id', $requestRecord->account)->first();
                 Log::info('request data' , [$initial_reqeuest]);
                 if ($initial_reqeuest) {
@@ -479,7 +479,7 @@ class RequestController extends Controller
                 }
 
                 DB::commit();
-            
+
             } catch (\Exception $e) {
                 DB::rollBack();
                 Log::error('Transaction failed: ' . $e->getMessage());
@@ -497,16 +497,12 @@ class RequestController extends Controller
     private function sendStatusChangeNotification($requestRecord, $status)
     {
         Log::info("Request data", [$requestRecord]);
-        
+
         // Retrieve emails
-        $requestUserEmail = User::where('id', $requestRecord->created_by)->pluck('email')->first();
-        $checkedByEmail = $requestRecord->checked_by
-            ? User::where('id', $requestRecord->checked_by)->pluck('email')->first()
-            : null;
-        $approvedByEmail = $requestRecord->approved_by
-            ? User::where('id', $requestRecord->approved_by)->pluck('email')->first()
-            : null;
-    
+        $requestUserEmail = $requestRecord->checkedRef?->email ?? null;
+        $checkedByEmail = $requestRecord->checkedRef?->email ?? null;
+        $approvedByEmail = $requestRecord->approvedRef?->email ?? null;
+
         // CC emails
         $ccEmails = [];
         if ($checkedByEmail && $checkedByEmail !== $requestUserEmail) {
@@ -518,7 +514,7 @@ class RequestController extends Controller
         Log::info("Request User Email: ", [$requestUserEmail]);
         Log::info("Checked By Email: ", [$checkedByEmail]);
         Log::info("Approved By Email: ", [$approvedByEmail]);
-    
+
         // Email content
         $emailSubject = "Request #{$requestRecord->id} Status Updated: " . ucfirst($status);
         $emailContent = "
@@ -537,20 +533,20 @@ class RequestController extends Controller
                 </ul>
             </body>
             </html>";
-    
+
         // Send email
         $sendgrid = new \SendGrid(env('SENDGRID_API_KEY'));
         $emailMessage = new \SendGrid\Mail\Mail();
         $emailMessage->setFrom("info@vallibelone.com", "Vallibel One");
         $emailMessage->setSubject($emailSubject);
         $emailMessage->addTo($requestUserEmail);
-    
+
         foreach ($ccEmails as $ccEmail) {
             $emailMessage->addCc($ccEmail);
         }
-    
+
         $emailMessage->addContent("text/html", $emailContent);
-    
+
         try {
             $response = $sendgrid->send($emailMessage);
             if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
@@ -564,7 +560,7 @@ class RequestController extends Controller
             Log::error('Caught exception: ' . $e->getMessage());
             return false;
         }
-    }   
+    }
 
 
     public function getChatStatus($id)
@@ -651,7 +647,7 @@ class RequestController extends Controller
             $entry->approved_at = now();
             $entry->approved_by = Auth::user()->id; // Assuming a logged-in user is approving the request
             $entry->save();
-    
+
             $data = SubRequest::query()->findOrFail($validated['requestId']);
             $data->status = SubRequest::STATUS_APPROVED;
             $data->approved_by = Auth::user()->id;
@@ -668,7 +664,7 @@ class RequestController extends Controller
 
             $this->sendStatusChangeNotification($sub_request, SubRequest::STATUS_APPROVED);
 
-    
+
             return response()->json(['success' => true, 'message' => 'Request approved successfully.']);
         } catch (\Exception $e) {
             DB::rollBack();
