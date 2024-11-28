@@ -126,6 +126,15 @@
                 </li>
                 @endcan
 
+                @can('show admin requests')
+                <li class="nav-item">
+                    <a href="{{ route('transaction.report') }}" class="nav-link">
+                        <i class="fas fa-file-signature nav-icon"></i>
+                        <p>Transaction Report</p>
+                    </a>
+                </li>
+                @endcan
+
             </ul>
         </nav>
     </div>

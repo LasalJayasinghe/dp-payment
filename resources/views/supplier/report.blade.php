@@ -36,7 +36,7 @@
                                 class="form-control"
                                 onchange="this.form.submit()">
                                 <option value="">All Suppliers</option>
-                                @foreach($suppliers as $supplier)
+                                @foreach($supplier_Dropdown as $supplier)
                                     <option value="{{ $supplier->id }}" 
                                         {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
                                         {{ $supplier->company_name }}
@@ -64,28 +64,28 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Supplier</th>
-                                    <th>Account Name</th>
-                                    <th>Bank Name</th>
+                                    <th>Company Name</th>
+                                    <th>Supplier's Name</th>
+                                    <th>Supplier's Email</th>
                                     <th>Full Amount</th>
                                     <th>Due Amount</th>
                                     <th>Paid Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($accounts as $account)
+                                @forelse ($suppliers as $supplier)
                                 <tr>
-                                    <td>{{ $account->id }}</td>
-                                    <td>{{ $account->supplier }}</td>
-                                    <td>{{ $account->account_name }}</td>
-                                    <td>{{ $account->bank_name }}</td>
-                                    <td>{{ $account->total_amount }}</td>
-                                    <td>{{ $account->due_amount }}</td>
-                                    <td>{{ $account->total_payed_amount }}</td>
+                                    <td>{{ $supplier->id }}</td>
+                                    <td>{{ $supplier->company_name }}</td>
+                                    <td>{{ $supplier->supplier_name }}</td>
+                                    <td>{{ $supplier->email }}</td>
+                                    <td>{{ $supplier->total_amount }}</td>
+                                    <td>{{ $supplier->due_amount }}</td>
+                                    <td>{{ $supplier->total_payed_amount }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="text-center">No results found.</td>
+                                    <td colspan="7" class="text-center">No results found.</td>
                                 </tr>
                                 @endforelse 
                             </tbody>

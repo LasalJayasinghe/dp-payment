@@ -633,7 +633,6 @@ class RequestController extends Controller
             'depositSlip' => 'nullable|file|mimes:jpg,png,pdf|max:2048', // Ensure file is valid
         ]);
 
-        Log::info("in");
         try {
             DB::beginTransaction();
             // Process file upload if present
@@ -659,7 +658,7 @@ class RequestController extends Controller
             $data->approved_date = Carbon::now();
             $data->saveOrFail();
 
-            $initial_reqeuest = Requests::where('id', $sub_request->id)->first();
+            $initial_reqeuest = Requests::where('id', $sub_request->request)->first();
             if($initial_reqeuest->due_amount == 0)
             {
                 $initial_reqeuest->status = "approved";

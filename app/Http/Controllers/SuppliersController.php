@@ -67,104 +67,16 @@ class SuppliersController extends Controller
     }
 
 
-        public function getAccounts($supplierId)
-        {
-            $accounts = SupplierAccount::where('supplier_id', $supplierId)->get();
-            return response()->json($accounts);
-        }
-
-    public function getSupplierReport(REQUEST $request)
+    public function getAccounts($supplierId)
     {
-        $supplierId = $request->input('supplier_id');
-
-        $accountsQuery = SupplierAccount::orderBy('supplier_id');
-        if ($supplierId) {
-            $accountsQuery->where('supplier_id', $supplierId);
-        }
-        $accounts = $accountsQuery->get();
-
-        foreach ($accounts as $account) {
-            $account->total_payed_amount = SubRequest::where(['account'=> $account->id , 'status' => SubRequest::STATUS_APPROVED])->sum('paid_amount');
-        
-            $account->total_amount = SubRequest::where([
-                'account' => $account->id,
-                'status' => SubRequest::STATUS_APPROVED,
-            ])
-            ->groupBy('request')
-            ->selectRaw('MAX(amount) as amount')
-            ->sum('amount');
-
-            $account->due_amount = $account->total_amount - $account->total_payed_amount;
-            $account->supplier = Supplier::where('id',$account->supplier_id)->pluck('company_name')->first();
-        }
-
-        $suppliers = Supplier::all();
-
-        return view('supplier.report' , compact('accounts' , 'suppliers'));
+        $accounts = SupplierAccount::where('supplier_id', $supplierId)->get();
+        return response()->json($accounts);
     }
 
-
-    public function exportReport(Request $request)
-    {
-        $supplierId = $request->input('supplier_id');
-
-        $accountsQuery = SupplierAccount::orderBy('supplier_id');
-        
-        if ($supplierId) {
-            $accountsQuery->where('supplier_id', $supplierId);
-        }
-
-        $accounts = $accountsQuery->get();
-
-        foreach ($accounts as $account) {
-            $subRequestIds = SubRequest::where('account', $account->id)->pluck('id');
-
-            $account->total_payed_amount = Transaction::where('status', Transaction::TRANSACTION_SUCCESS)
-                ->whereIn('sub_request', $subRequestIds) 
-                ->sum('amount');
-        
-            $account->total_amount = Requests::where('status', 'approved')
-                ->where('account_id', $account->id) // Filter by supplier_id
-                ->sum('amount');
-        
-            $account->due_amount = $account->total_amount - $account->total_payed_amount;
-            $account->supplier = Supplier::where('id',$account->supplier_id)->pluck('company_name')->first();
-        }
-
-        $csvHeader = ['ID', 'Supplier', 'Account Name', 'Bank Name', 'Full Amount', 'Due Amount', 'Paid Amount'];
-
-        $csvData = $accounts->map(function ($account) {
-            return [
-                $account->id,
-                $account->supplier,
-                $account->account_name,  // Assuming you have account name in $account
-                $account->bank_name,     // Assuming you have bank name in $account
-                $account->total_amount,
-                $account->due_amount,
-                $account->total_payed_amount,
-            ];
-        });
-
-        $fileContent = fopen('php://memory', 'w');
-        fputcsv($fileContent, $csvHeader); // Add header
-        foreach ($csvData as $row) {
-            fputcsv($fileContent, $row);
-        }
-        rewind($fileContent);
-
-        return Response::streamDownload(function () use ($fileContent) {
-            fpassthru($fileContent);
-        }, 'supplier_report.csv', [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="supplier_report.csv"',
-        ]);
-    }
-        public function getSuppliers()
+    public function getSuppliers()
     {
 
         $suppliers = Supplier::select('id', 'company_name')->orderBy('company_name')->get();
         return response()->json($suppliers);
     }
-
-
 }

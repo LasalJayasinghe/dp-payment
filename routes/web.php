@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChartController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentRequestController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\SuppliersController;
 
@@ -58,10 +59,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/supplier/show', [SuppliersController::class, 'showSuppliers'])->name('supplier.show');
     Route::delete('/supplier/{id}', [SuppliersController::class, 'destroy'])->name('supplier.destroy');
     Route::get('/supplier/{supplierId}/accounts', [SuppliersController::class, 'getAccounts']);
-    Route::get('/supplier/report', [SuppliersController::class, 'getSupplierReport'])->name('supplier.report');
-    Route::get('/supplier/report/export', [SuppliersController::class, 'exportReport'])->name('supplier.report.export');
     Route::get('/suppliers/list', [SuppliersController::class, 'getSuppliers'])->name('suppliers.list');
 
+    Route::get('/transaction', [ReportController::class, 'getTransactionReport'])->name('transaction.report');
+    Route::get('/transaction/export', [ReportController::class, 'exportTransactionReport'])->name('transaction.report.export');
+    Route::get('/supplier/report', [ReportController::class, 'getSupplierReport'])->name('supplier.report');
+    Route::get('/supplier/report/export', [ReportController::class, 'exportReport'])->name('supplier.report.export');
 
     Route::get('/payment-request/pdf', [PaymentRequestController::class, 'generatePdf'])->name('payment-request.pdf');
     Route::post('/request/approve', [RequestController::class, 'approveRequest'])->name('request.approve');

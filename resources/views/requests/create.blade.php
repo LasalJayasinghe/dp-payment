@@ -50,21 +50,18 @@
                                         <div class="form-group" style="width: 400px;">
                                             <label for="subcategory">Payment Category*</label>
                                             <select class="form-control" id="subcategory" name="subcategory" required>
-                                                <option value="dpdigitalmarketing">DP Digital Marketing</option>
-                                                <option value="dpeducation">DP Education</option>
-                                                <option value="dpitcampus">DP IT Campus</option>
-                                                <option value="dpcode">DP Code</option>
-                                                <option value="dpkids">DP Kids</option>
-                                                <option value="dpuniversity">DP University</option>
-                                                <option value="dpdigitallibrary">DP Digital Library</option>
-                                                <option value="dpofflinemarketing">DP Offline Marketing</option>
-                                                <option value="dpevents">DP Events</option>
-                                                <option value="dptvet">DP TVET Studies</option>
-                                                <option value="dplangscl">DP Language School</option>
-                                                <option value="dpsport">DP Sports</option>
-                                                <option value="dphealth">DP Public Health</option>
-                                                <option value="dpbuddhist">DP Buddhist Studies</option>
-                                                <option value="other">Other</option>
+                                                <option value="DP Code">DP Code</option>
+                                                <option value="DP Kids">DP Kids</option>
+                                                <option value="DP University">DP University</option>
+                                                <option value="DP Digital Library">DP Digital Library</option>
+                                                <option value="DP Offline Marketing">DP Offline Marketing</option>
+                                                <option value="DP Events">DP Events</option>
+                                                <option value="DP TVET Studies">DP TVET Studies</option>
+                                                <option value="DP Language School">DP Language School</option>
+                                                <option value="DP Sports">DP Sports</option>
+                                                <option value="DP Public Health">DP Public Health</option>
+                                                <option value="DP Buddhist Studies">DP Buddhist Studies</option>
+                                                <option value="Other">Other</option>
                                             </select>
                                         </div>
                                     </div>
