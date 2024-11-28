@@ -67,4 +67,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/request/approve', [RequestController::class, 'approveRequest'])->name('request.approve');
     Route::get('/chart-data', [ChartController::class, 'getChartData'])->name('chart.data');
 
+    Route::get('cash-accounts', [\App\Http\Controllers\CashAccountController::class, 'index'])
+        ->name('cash-accounts');
+    Route::post('create-cash-account', [\App\Http\Controllers\CashAccountController::class, 'create'])
+        ->name('create-cash-account');
+    Route::patch('cash-account/{id}/{status}/status-change', [\App\Http\Controllers\CashAccountController::class, 'accountStatusToggle'])
+        ->name('cash-account-status-change');
+    Route::patch('cash-account-funds-transfer', [\App\Http\Controllers\CashAccountController::class, 'credit'])
+        ->name('cash-account-funds-transfer');
+    Route::get('cash-account-detail/{id}', [\App\Http\Controllers\CashAccountController::class, 'detail'])
+        ->name('cash-account-detail');
+    Route::delete('cash-account-remove/{id}', [\App\Http\Controllers\CashAccountController::class, 'remove'])
+        ->name('cash-account-remove');
 });

@@ -99,7 +99,7 @@
                         </li>
                     </ul>
                 </li>
-                
+
                 @can('add user')
                 <li class="nav-item">
                     <a href="{{ route('auth.signup') }}" class="nav-link">
@@ -116,7 +116,7 @@
                     </a>
                 </li>
 
-                                
+
                 @can('show admin requests')
                 <li class="nav-item">
                     <a href="{{ route('supplier.report') }}" class="nav-link">
@@ -126,6 +126,12 @@
                 </li>
                 @endcan
 
+                <li class="nav-item">
+                    <a href="{{ route('cash-accounts') }}" class="nav-link">
+                        <i class="nav-icon fa fa-credit-card"></i>
+                        <p>Cash Accounts</p>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>
