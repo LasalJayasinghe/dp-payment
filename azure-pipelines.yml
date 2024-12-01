@@ -1,0 +1,59 @@
+trigger:
+  - master
+
+pool: ContaboUbuntu
+
+steps:
+# Run Composer install
+- script: composer install --no-interaction --prefer-dist
+  displayName: 'Composer Install'
+
+# Run npm install with sudo
+- script: |
+    sudo npm install
+  displayName: 'npm Install'
+
+# Run npm build with sudo
+- script: |
+    sudo npm run build
+  displayName: 'npm Build'
+
+# Copy files to the publish directory
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: |
+      **/**
+      !**/node_modules/**
+      !**/.git/**
+      !**/storage/**
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    CleanTargetFolder: true
+    OverWrite: true
+  displayName: 'Copy Files to Publish Directory'
+
+# Change ownership of node_modules and public directories after staging
+- script: |
+    sudo chown -R opc:opc $(Build.SourcesDirectory)/node_modules
+    sudo chown -R opc:opc $(Build.SourcesDirectory)/public
+  displayName: 'Set Ownership for node_modules and public'
+
+# Copy built files to Docker container
+- script: |
+    docker cp $(Build.ArtifactStagingDirectory)/. php8-apache-container:/var/www/html/
+  displayName: 'Copy Files to Docker Container'
+
+# Optional: Set appropriate permissions for the copied files in Docker container
+- script: |
+    docker exec php8-apache-container chown -R www-data:www-data /var/www/html/
+    docker exec php8-apache-container chmod -R 755 /var/www/html/
+  displayName: 'Set File Permissions in Docker Container'
+
+# Publish build artifacts
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'build_$(Build.BuildId)'
+    publishLocation: 'Container'
+    StoreAsTar: true
+  displayName: 'Publish Build Artifacts'
