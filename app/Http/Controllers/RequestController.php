@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendStatusNotification;
 use App\Models\ApprovedRequest;
 use App\Models\CashAccount;
 use App\Models\CashAccountFeedLog;
-use App\Models\Category;
 use App\Models\Chat;
 use App\Models\ChatStatus;
 use App\Models\Files;
@@ -15,14 +15,12 @@ use App\Models\SubRequest;
 use App\Models\Supplier;
 use App\Models\SupplierAccount;
 use App\Models\Transaction;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -461,7 +459,6 @@ class RequestController extends Controller
 
                 DB::commit();
 
-
             } catch (\Exception $e) {
                 DB::rollBack();
                 Log::error('Transaction failed: ' . $e->getMessage());
@@ -478,70 +475,7 @@ class RequestController extends Controller
 
     private function sendStatusChangeNotification($requestRecord, $status)
     {
-        Log::info("Request data", [$requestRecord]);
-
-        // Retrieve emails
-        $requestUserEmail = User::where('id', $requestRecord->created_by)->pluck('email')->first() ?? null;
-        $checkedByEmail = $requestRecord->checkedRef?->email ?? null;
-        $approvedByEmail = $requestRecord->approvedRef?->email ?? null;
-
-        // CC emails
-        $ccEmails = [];
-        if ($checkedByEmail && $checkedByEmail !== $requestUserEmail) {
-            $ccEmails[] = $checkedByEmail;
-        }
-        if ($approvedByEmail && $approvedByEmail !== $requestUserEmail && $approvedByEmail !== $checkedByEmail) {
-            $ccEmails[] = $approvedByEmail;
-        }
-        Log::info("Request User Email: ", [$requestUserEmail]);
-        Log::info("Checked By Email: ", [$checkedByEmail]);
-        Log::info("Approved By Email: ", [$approvedByEmail]);
-
-        // Email content
-        $emailSubject = "Request #{$requestRecord->id} Status Updated: " . ucfirst($status);
-        $emailContent = "
-            <html>
-            <head>
-                <title>Status Update Notification</title>
-            </head>
-            <body>
-                <p>The request with ID {$requestRecord->id} has been {$status}.</p>
-                <p>Details:</p>
-                <ul>
-                    <li>Request ID: {$requestRecord->id}</li>
-                    <li>Status: {$status}</li>
-                    <li>Checked By: " . ($checkedByEmail ?? 'N/A') . "</li>
-                    <li>Approved By: " . ($approvedByEmail ?? 'N/A') . "</li>
-                </ul>
-            </body>
-            </html>";
-
-        // Send email
-        $sendgrid = new \SendGrid(env('SENDGRID_API_KEY'));
-        $emailMessage = new \SendGrid\Mail\Mail();
-        $emailMessage->setFrom("info@vallibelone.com", "Vallibel One");
-        $emailMessage->setSubject($emailSubject);
-        $emailMessage->addTo($requestUserEmail);
-
-        foreach ($ccEmails as $ccEmail) {
-            $emailMessage->addCc($ccEmail);
-        }
-
-        $emailMessage->addContent("text/html", $emailContent);
-
-        try {
-            $response = $sendgrid->send($emailMessage);
-            if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
-                Log::info("Successfully sent email: ", [$response->statusCode()]);
-                return true;
-            } else {
-                Log::error("Failed to send email: ", [$response->statusCode(), $response->body()]);
-                return false;
-            }
-        } catch (\Exception $e) {
-            Log::error('Caught exception: ' . $e->getMessage());
-            return false;
-        }
+        SendStatusNotification::dispatch($requestRecord, $status);
     }
 
 
