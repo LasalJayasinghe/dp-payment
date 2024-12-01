@@ -451,7 +451,7 @@ class RequestController extends Controller
                 $transaction->save();
 
                 $requestRecord->due_amount += $requestRecord->paid_amount;
-                
+
                 $initial_reqeuest = Requests::where('id', $requestRecord->account)->first();
                 Log::info('request data' , [$initial_reqeuest]);
                 if ($initial_reqeuest) {
@@ -460,6 +460,7 @@ class RequestController extends Controller
                 }
 
                 DB::commit();
+
 
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -480,13 +481,9 @@ class RequestController extends Controller
         Log::info("Request data", [$requestRecord]);
 
         // Retrieve emails
-        $requestUserEmail = User::where('id', $requestRecord->created_by)->pluck('email')->first();
-        $checkedByEmail = $requestRecord->checked_by
-            ? User::where('id', $requestRecord->checked_by)->pluck('email')->first()
-            : null;
-        $approvedByEmail = $requestRecord->approved_by
-            ? User::where('id', $requestRecord->approved_by)->pluck('email')->first()
-            : null;
+        $requestUserEmail = User::where('id', $requestRecord->created_by)->pluck('email')->first() ?? null;
+        $checkedByEmail = $requestRecord->checkedRef?->email ?? null;
+        $approvedByEmail = $requestRecord->approvedRef?->email ?? null;
 
         // CC emails
         $ccEmails = [];
