@@ -434,11 +434,12 @@ class RequestController extends Controller
             $requestRecord->approved_date = Carbon::now();
 
         } elseif ($validated['status'] === SubRequest::STATUS_REJECTED) {
+            DB::beginTransaction();
             try {
-                DB::beginTransaction();
-
+                $sub_request = SubRequest::query()->findOrFail($request->request_id);
                 $rejectedRequest = new RejectedRequests();
-                $rejectedRequest->request_id = $request->request_id;
+                $rejectedRequest->request_id = $sub_request->request;
+                $rejectedRequest->sub_request = $request->request_id;
                 $rejectedRequest->rejected_by = Auth::id();
                 $rejectedRequest->message = $request->reject_message;
                 $rejectedRequest->save();
