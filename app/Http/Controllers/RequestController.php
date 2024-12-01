@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendStatusNotification;
 use App\Models\ApprovedRequest;
 use App\Models\Category;
 use App\Models\Chat;
@@ -34,7 +35,7 @@ class RequestController extends Controller
         $statusFilter = $request->input('status');
 
         $query = SubRequest::query();
-    
+
         if ($user->role == 'user') {
             $query->where('created_by', $user->id);
         } elseif ($user->role == 'highAccount' || $user->role == 'minAccount') {
@@ -45,13 +46,13 @@ class RequestController extends Controller
             $query->where('approved_by', $user->id);
         } elseif ($user->role == 'admin') {
         }
-    
+
         if ($statusFilter) {
             $query->where('status', $statusFilter);
         }
-    
+
         $requests = $query->get();
-    
+
         return view('requests.history', compact('requests'));
     }
 
@@ -460,7 +461,7 @@ class RequestController extends Controller
 
                 $rejectedRequest = new RejectedRequests();
                 $rejectedRequest->request_id = $request->request_id;
-                $rejectedRequest->rejected_by = Auth::id();  
+                $rejectedRequest->rejected_by = Auth::id();
                 $rejectedRequest->message = $request->reject_message;
                 $rejectedRequest->save();
 
@@ -470,7 +471,7 @@ class RequestController extends Controller
                 $transaction->save();
 
                 $requestRecord->due_amount += $requestRecord->paid_amount;
-                
+
                 $initial_reqeuest = Requests::where('id', $requestRecord->account)->first();
                 Log::info('request data' , [$initial_reqeuest]);
                 if ($initial_reqeuest) {
@@ -479,7 +480,7 @@ class RequestController extends Controller
                 }
 
                 DB::commit();
-            
+
             } catch (\Exception $e) {
                 DB::rollBack();
                 Log::error('Transaction failed: ' . $e->getMessage());
@@ -496,75 +497,8 @@ class RequestController extends Controller
 
     private function sendStatusChangeNotification($requestRecord, $status)
     {
-        Log::info("Request data", [$requestRecord]);
-        
-        // Retrieve emails
-        $requestUserEmail = User::where('id', $requestRecord->created_by)->pluck('email')->first();
-        $checkedByEmail = $requestRecord->checked_by
-            ? User::where('id', $requestRecord->checked_by)->pluck('email')->first()
-            : null;
-        $approvedByEmail = $requestRecord->approved_by
-            ? User::where('id', $requestRecord->approved_by)->pluck('email')->first()
-            : null;
-    
-        // CC emails
-        $ccEmails = [];
-        if ($checkedByEmail && $checkedByEmail !== $requestUserEmail) {
-            $ccEmails[] = $checkedByEmail;
-        }
-        if ($approvedByEmail && $approvedByEmail !== $requestUserEmail && $approvedByEmail !== $checkedByEmail) {
-            $ccEmails[] = $approvedByEmail;
-        }
-        Log::info("Request User Email: ", [$requestUserEmail]);
-        Log::info("Checked By Email: ", [$checkedByEmail]);
-        Log::info("Approved By Email: ", [$approvedByEmail]);
-    
-        // Email content
-        $emailSubject = "Request #{$requestRecord->id} Status Updated: " . ucfirst($status);
-        $emailContent = "
-            <html>
-            <head>
-                <title>Status Update Notification</title>
-            </head>
-            <body>
-                <p>The request with ID {$requestRecord->id} has been {$status}.</p>
-                <p>Details:</p>
-                <ul>
-                    <li>Request ID: {$requestRecord->id}</li>
-                    <li>Status: {$status}</li>
-                    <li>Checked By: " . ($checkedByEmail ?? 'N/A') . "</li>
-                    <li>Approved By: " . ($approvedByEmail ?? 'N/A') . "</li>
-                </ul>
-            </body>
-            </html>";
-    
-        // Send email
-        $sendgrid = new \SendGrid(env('SENDGRID_API_KEY'));
-        $emailMessage = new \SendGrid\Mail\Mail();
-        $emailMessage->setFrom("info@vallibelone.com", "Vallibel One");
-        $emailMessage->setSubject($emailSubject);
-        $emailMessage->addTo($requestUserEmail);
-    
-        foreach ($ccEmails as $ccEmail) {
-            $emailMessage->addCc($ccEmail);
-        }
-    
-        $emailMessage->addContent("text/html", $emailContent);
-    
-        try {
-            $response = $sendgrid->send($emailMessage);
-            if ($response->statusCode() >= 200 && $response->statusCode() < 300) {
-                Log::info("Successfully sent email: ", [$response->statusCode()]);
-                return true;
-            } else {
-                Log::error("Failed to send email: ", [$response->statusCode(), $response->body()]);
-                return false;
-            }
-        } catch (\Exception $e) {
-            Log::error('Caught exception: ' . $e->getMessage());
-            return false;
-        }
-    }   
+        SendStatusNotification::dispatch($requestRecord, $status);
+    }
 
 
     public function getChatStatus($id)
@@ -651,7 +585,7 @@ class RequestController extends Controller
             $entry->approved_at = now();
             $entry->approved_by = Auth::user()->id; // Assuming a logged-in user is approving the request
             $entry->save();
-    
+
             $data = SubRequest::query()->findOrFail($validated['requestId']);
             $data->status = SubRequest::STATUS_APPROVED;
             $data->approved_by = Auth::user()->id;
@@ -668,7 +602,7 @@ class RequestController extends Controller
 
             $this->sendStatusChangeNotification($sub_request, SubRequest::STATUS_APPROVED);
 
-    
+
             return response()->json(['success' => true, 'message' => 'Request approved successfully.']);
         } catch (\Exception $e) {
             DB::rollBack();
